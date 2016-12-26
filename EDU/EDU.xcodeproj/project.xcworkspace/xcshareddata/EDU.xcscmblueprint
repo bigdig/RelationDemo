@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "141FF75C2DCA770598031A499A5C9E3AF800D315",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "141FF75C2DCA770598031A499A5C9E3AF800D315" : 0,
+    "17A1EDC9D062A2516E7706189F10F7605C1DAD4E" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "297C5C12-BFEF-4E4C-B718-3DE3EA61984A",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "141FF75C2DCA770598031A499A5C9E3AF800D315" : "EDU\/",
+    "17A1EDC9D062A2516E7706189F10F7605C1DAD4E" : ""
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "EDU",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "EDU\/EDU.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/bigdig\/EDU.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "141FF75C2DCA770598031A499A5C9E3AF800D315"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/bigdig\/EDU.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "17A1EDC9D062A2516E7706189F10F7605C1DAD4E"
+    }
+  ]
+}

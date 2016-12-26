@@ -1,0 +1,97 @@
+//
+//  EDU.pch
+//  EDU
+//
+//  Created by renxingguo on 16/8/31.
+//  Copyright © 2016年 YRYM. All rights reserved.
+//
+
+#ifndef EDU_pch
+#define EDU_pch
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+
+/**
+ 接口访问请使用：http://ifc.dressbook.cn
+ 静态资源访问：http://st.dressbook.cn
+ 动态页面访问：http://admin.dressbook.cn
+ */
+/**
+#define Prefix               @"http://dt.xingguangedu.com/"             //图片的前缀
+#define DOMAIN_NAME_JAVA          @"http://ifc.xingguangedu.com/"
+#define BASEURL @"http://ifc.xingguangedu.com/"
+
+#define SHARE_URL @"http://xingguangedu.com/share/download.html?from=singlemessage"
+*/
+#define Prefix               @"http://st.dressbook.cn"             //图片的前缀
+#define DOMAIN_NAME_JAVA          @"http://ifc.dressbook.cn/"
+#define BASEURL @"http://ifc.dressbook.cn/"
+
+#define SHARE_URL @"http://xingguangedu.com/share/download.html?from=singlemessage"
+
+#define HEXCOLOR(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0]
+#define COLOR_RED HEXCOLOR(0xe62b25)
+#define COLOR_LITLE_GREE [UIColor colorWithRed:149/255.0 green:198/255.0 blue:45/255.0 alpha:1.0]
+#define COLOR_LITLE_BLUE [UIColor colorWithRed:28/255.0 green:173/255.0 blue:209/255.0 alpha:1.0]
+
+//精品馆id
+#define BOUTIQUE_ID 3
+
+#define iPhone5 ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(640, 1136), [[UIScreen mainScreen] currentMode].size) : NO)
+
+//用户信息
+#define kMY_USER_ID @"userID"
+#define kMY_API_KEY @"myApiKey"
+#define kMY_USER_PASSWORD @"myUserPassword"
+#define kMY_USER_DESC @"myUserDescription"
+#define kMY_USER_NICKNAME @"username"
+#define kMY_USER_Head @"myUserHead"
+#define kMY_USER_LoginName @"myUserLoginName"
+#define kXMPPHost @"www.hcios.com"
+#define kXMPPmyJID @"userID"
+#define kXMPPmyPassword @"myXmppPassword"
+#define kXMPPNewMsgNotifaction @"xmppNewMsgNotifaction"
+
+//FMDB
+#define FMDBQuickCheck(SomeBool) { if (!(SomeBool)) { NSLog(@"Failure on line %d", __LINE__); abort(); } }
+
+#define DATABASE_PATH [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0]stringByAppendingString:@"/dressbook.db"]
+
+#define NavBarFrame self.navigationController.navigationBar.frame
+
+
+#define MAX_PHONENUM_LEN  11
+#define MAX_PASSWORD_LEN  16
+#define MIN_PASSWORD_LEN  6
+
+#define ADVERTISMENT_HEIGHT 145
+
+#define WS(weakSelf)  __weak __typeof(&*self)weakSelf = self
+
+#define DEBUG_LOG 1
+
+#if (DEBUG_LOG == 1)
+#define XLOG(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#else
+#define XLOG(...) {}
+#endif
+
+#import "Configuration.h"
+#import "NSString+Mobile.h"
+#import "NSString+URL.h"
+#import "JSONHttpClient.h"
+#import "Configuration.h"
+#import "Macro.h"
+#import "NSString+URL.h"
+
+#import "UIImage+UIImageScale.h"
+#import "JSONHttpClient.h"
+#import "BCWXShareActivity.h"
+#import "ReactiveCocoa.h"
+
+#import "QQPlayViewController.h"
+
+
+#endif /* EDU_pch */

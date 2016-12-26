@@ -1,0 +1,3262 @@
+//
+//  AdvertismentViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/12.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "AdvertismentViewController.h"
+#import "JSONHTTPClient.h"
+#import "EDUAdDataModels.h"
+
+#import "SDWebImageManager.h"
+#import "SDWebImageDownloader.h"
+#import "UIImageView+WebCache.h"
+
+
+@interface AdvertismentViewController ()
+@property (nonatomic,strong) NSArray *model;
+@end
+
+@implementation AdvertismentViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+
+    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/ad/1.json",Prefix] params:nil completion:^(id json, JSONModelError *err) {
+        //
+        self.model = [EDUAdBaseClass modelObjectWithDictionary:json].info;
+        [self initUI];
+    }];
+}
+
+-(void)initUI{
+    
+    
+    NSMutableArray *viewsArray = [@[] mutableCopy];
+    
+    
+    UIImageView *imageView = [[UIImageView alloc] initWithFrame: CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, ADVERTISMENT_HEIGHT)];
+    [self.view addSubview:imageView];
+    
+    for (int i = 0; i < [_model count]; ++i) {
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame: CGRectMake(0, 0, self.view.frame.size.width, ADVERTISMENT_HEIGHT)];
+        
+        EDUAdInfo* data = [_model objectAtIndex:i];
+        NSString* url = [NSString stringWithFormat:@"%@/%@",Prefix, data.pic  ];
+        [imageView sd_setImageWithURL:[NSURL URLWithString:url]];
+        [viewsArray addObject:imageView];
+    }
+    
+    
+    
+    self.mainScorllView = [[CycleScrollView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, ADVERTISMENT_HEIGHT) animationDuration:2];
+    self.mainScorllView.backgroundColor = [[UIColor purpleColor] colorWithAlphaComponent:0.1];
+    
+    self.mainScorllView.fetchContentViewAtIndex = ^UIView *(NSInteger pageIndex){
+        return viewsArray[pageIndex];
+    };
+    @weakify(self);
+    self.mainScorllView.totalPagesCount = ^NSInteger(void){
+        @strongify(self);
+        return [self.model count];
+    };
+    self.mainScorllView.TapActionBlock = ^(NSInteger pageIndex){
+        NSLog(@"点击了第%d个",pageIndex);
+        //todo
+    };
+    [self.view addSubview:self.mainScorllView];
+    
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end
+//
+//  ArticlesListViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/13.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "ArticlesListViewController.h"
+
+#import "FirstViewController.h"
+#import "ReactiveCocoa.h"
+#import "UITableView+RereshHead.h"
+#import "JSONHTTPClient.h"
+#import "UIImageView+WebCache.h"
+#import "UIScrollView+Scroll.h"
+
+#import "EDUArticlesListByClsIdDataModels.h"
+
+@interface ArticlesListViewController ()
+
+@property (nonatomic,strong) EDUArticlesListByClsIdBaseClass* model;
+
+@end
+
+@implementation ArticlesListViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations.
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
+    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    
+    
+    
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    
+    @weakify(self);
+    self.tableView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        @strongify(self);
+        NSDictionary* para= @{@"cls_id": self.cls_id
+                              };
+        [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaArticlesListByClsId.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
+            //
+            self.model = [EDUArticlesListByClsIdBaseClass modelObjectWithDictionary:json];
+            [self.tableView reloadData];
+        }];
+        
+        return [RACSignal empty];
+    }];
+    
+    UIView *v = self.tableView.tableHeaderView;
+    CGRect fr = v.frame;
+    fr.size.height = 33;
+    v.frame = fr;
+    [self.tableView updateConstraintsIfNeeded];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Table view data source
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return [self.model.info count];
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    static NSString *CellIdentifier = @"course_cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    
+    EDUArticlesListByClsIdInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    {
+        UIImageView *image = [cell viewWithTag:100];
+        [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.thumb] URLEncodedString]]];
+        
+        UITapGestureRecognizer *myTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewClicked:)];
+        image.userInteractionEnabled = YES;
+        [image addGestureRecognizer:myTapGesture];
+    }
+    {
+        UILabel *text = [cell viewWithTag:110];
+        text.text = item.title;
+    }
+    {
+        UILabel *text = [cell viewWithTag:120];
+        text.text = @"";
+    }
+    return cell;
+}
+
+
+/*
+ // Override to support conditional editing of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+ // Return NO if you do not want the specified item to be editable.
+ return YES;
+ }
+ */
+
+/*
+ // Override to support editing the table view.
+ - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+ if (editingStyle == UITableViewCellEditingStyleDelete) {
+ // Delete the row from the data source
+ [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+ } else if (editingStyle == UITableViewCellEditingStyleInsert) {
+ // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+ }
+ }
+ */
+
+/*
+ // Override to support rearranging the table view.
+ - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
+ }
+ */
+
+/*
+ // Override to support conditional rearranging of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
+ // Return NO if you do not want the item to be re-orderable.
+ return YES;
+ }
+ */
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+-(void)imageViewClicked:(UITapGestureRecognizer*)gestRecognizer
+{
+    UIImageView* iv = (UIImageView*)gestRecognizer.view;
+    NSInteger tag = iv.tag; // then do what you want with this
+    
+    // or get the cell by going up thru the superviews until you find it
+    UIView* cellView = iv;
+    while(cellView && ![cellView isKindOfClass:[UITableViewCell class]])
+        cellView = cellView.superview; // go up until you find a cell
+    
+    // Then get its indexPath
+    UITableViewCell* cell = (UITableViewCell*)cellView;
+    NSIndexPath* indexPath = [self.tableView indexPathForCell:cell];
+    EDUArticlesListByClsIdInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    [Configuration Instance].current_video_url = item.url;
+    [Configuration Instance].current_video_url_title = item.title;
+    QQPlayViewController *vc = [[QQPlayViewController alloc] init];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+@end
+//
+//  DramaClubListViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/14.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "DramaClubListViewController.h"
+#import "UICollectionView+Empty.h"
+#import "EDUDramaListDataModels.h"
+#import "UIImageView+WebCache.h"
+#import "UIScrollView+Scroll.h"
+#import "JSONHttpClient.h"
+#import "UIButton+Expand.h"
+
+@interface DramaClubListViewController ()<UICollectionViewDelegate,UICollectionViewDataSource,UIScrollViewDelegate>
+
+@property (nonatomic,strong) EDUDramaListBaseClass* model;
+
+@end
+
+@implementation DramaClubListViewController
+
+
+static NSString * const reuseIdentifier = @"group_cell";
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+
+    
+        // Do any additional setup after loading the view.
+    /**
+        self.collectionView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+            //
+            [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaArticlesDramaList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+                //
+                self.model = [[EDUDramaListBaseClass alloc] initWithDictionary:json];
+                [self.collectionView reloadData];
+            }];
+            return [RACSignal empty];
+        }];
+     */
+    
+    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaArticlesDramaList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+        //
+        self.model = [[EDUDramaListBaseClass alloc] initWithDictionary:json];
+        [self.collectionView reloadData];
+    }];
+      
+    
+    UIButton *moreButton = [self.view viewWithTag:100];
+    [moreButton setEnlargeEdge:10];
+    if (moreButton) {
+        moreButton.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+            UIViewController *vc = [self.storyboard instantiateViewControllerWithIdentifier:@"MoreDramaClubListViewController"];
+            [self.navigationController pushViewController:vc animated:YES];
+            return [RACSignal empty];
+        }];
+    }
+    
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+#pragma mark <UICollectionViewDataSource>
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    
+    return 1;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    if (self.maxShowCount<6) {
+        self.maxShowCount = 1000;
+    }
+    return MIN( MAX(6,self.maxShowCount),[self.model.info count]);
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    
+    EDUDramaListInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    {
+        UIImageView *image = [cell viewWithTag:100];
+        
+        [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.thumb] URLEncodedString]]];
+        
+        UITapGestureRecognizer *myTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewClicked:)];
+        image.userInteractionEnabled = YES;
+        [image addGestureRecognizer:myTapGesture];
+    }
+    {
+        UILabel *text = [cell viewWithTag:110];
+        text.text = item.title;
+    }
+    
+    [cell layoutIfNeeded];
+    return cell;
+}
+
+#pragma mark <UICollectionViewDelegate>
+
+/*
+ // Uncomment this method to specify if the specified item should be highlighted during tracking
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
+	return YES;
+ }
+ */
+
+/*
+ // Uncomment this method to specify if the specified item should be selected
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+ return YES;
+ }
+ */
+
+/*
+ // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
+	return NO;
+ }
+ 
+ - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	return NO;
+ }
+ 
+ - (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	
+ }
+ */
+
+//- (CGSize)collectionViewContentSize
+//{
+//    float unit = [UIScreen mainScreen].bounds.size.width;
+//    return CGSizeMake(unit, unit);
+//}
+
+//定义每个UICollectionViewCell 的大小
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    float unit = ([UIScreen mainScreen].bounds.size.width-6)/3;
+    
+    return CGSizeMake(unit, unit*21/24);
+}
+//每个section中不同的行之间的行间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 2;
+}
+//每个item之间的间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 0;
+}
+
+
+-(void)imageViewClicked:(UITapGestureRecognizer*)gestRecognizer
+{
+    
+    UIImageView* iv = (UIImageView*)gestRecognizer.view;
+    NSInteger tag = iv.tag; // then do what you want with this
+    
+    // or get the cell by going up thru the superviews until you find it
+    UIView* cellView = iv;
+    while(cellView && ![cellView isKindOfClass:[UICollectionViewCell class]])
+        cellView = cellView.superview; // go up until you find a cell
+    
+    // Then get its indexPath
+    UICollectionViewCell* cell = (UICollectionViewCell*)cellView;
+    NSIndexPath* indexPath = [self.collectionView indexPathForCell:cell];
+    EDUDramaListInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    [Configuration Instance].current_video_url = item.url;
+    [Configuration Instance].current_video_url_title = item.title;
+    QQPlayViewController *vc = [[QQPlayViewController alloc] init];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+@end
+//
+//  FirstPageGroupCourseViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/11/25.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "FirstPageGroupCourseViewController.h"
+#import "UIButton+Expand.h"
+#import "UICollectionView+Empty.h"
+#import "EDUGroupCourseListDataModels.h"
+#import "UIImageView+WebCache.h"
+#import "UIScrollView+Scroll.h"
+#import "JSONHttpClient.h"
+
+@interface FirstPageGroupCourseViewController ()<UICollectionViewDelegate,UICollectionViewDataSource>
+
+@property (nonatomic,strong) EDUGroupCourseListBaseClass* model;
+
+@end
+
+@implementation FirstPageGroupCourseViewController
+
+
+static NSString * const reuseIdentifier = @"group_cell";
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+    // Do any additional setup after loading the view.
+    /**
+     self.collectionView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+     //
+     [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaArticlesClsList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+     //
+     self.model = [[EDUArticlesBaseClass alloc] initWithDictionary:json];
+     [self.collectionView reloadData];
+     }];
+     return [RACSignal empty];
+     }];
+     */
+    
+    NSDictionary* para= @{@"group_id":@"22"
+                          };
+    
+    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/resGroupCourseList.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
+        //
+        self.model = [[EDUGroupCourseListBaseClass alloc] initWithDictionary:json];
+        [self.collectionView reloadData];
+    }];
+    
+    UIButton *moreButton = [self.view viewWithTag:100];
+    [moreButton setEnlargeEdge:10];
+    moreButton.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        [Configuration Instance].current_group_id = 22;
+        
+        UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+        UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"GroupCourseListCollectionViewController"];
+        [self.navigationController pushViewController:vc animated:YES];
+        return  [RACSignal empty];
+    }];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+#pragma mark <UICollectionViewDataSource>
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    
+    return 1;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return [self.model.info.courseList count];
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    
+    
+    EDUGroupCourseListCourseList *item = [self.model.info.courseList objectAtIndex:indexPath.row];
+    
+    {
+        UIImageView *image = [cell viewWithTag:100];
+        
+        [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.thumb] URLEncodedString]]];
+        
+//        UITapGestureRecognizer *myTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewClicked:)];
+//        image.userInteractionEnabled = YES;
+//        [image addGestureRecognizer:myTapGesture];
+    }
+    {
+        UILabel *text = [cell viewWithTag:110];
+        text.text = item.title;
+    }
+    {
+        UILabel *text = [cell viewWithTag:120];
+        text.text = item.tag;
+        //text.text = [NSString stringWithFormat:@"%0.0f", item.duration];
+    }
+    
+//    {
+//        UILabel *text = [cell viewWithTag:130];
+//        text.text = item.timeShow;
+//    }
+    
+    [cell layoutIfNeeded];
+    return cell;
+}
+
+#pragma mark <UICollectionViewDelegate>
+
+/*
+ // Uncomment this method to specify if the specified item should be highlighted during tracking
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
+	return YES;
+ }
+ */
+
+/*
+ // Uncomment this method to specify if the specified item should be selected
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+ return YES;
+ }
+ */
+
+/*
+ // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
+	return NO;
+ }
+ 
+ - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	return NO;
+ }
+ 
+ - (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	
+ }
+ */
+
+//- (CGSize)collectionViewContentSize
+//{
+//    float unit = [UIScreen mainScreen].bounds.size.width;
+//    return CGSizeMake(unit, unit);
+//}
+
+//定义每个UICollectionViewCell 的大小
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    //float unit = ([UIScreen mainScreen].bounds.size.width-4)/2;
+    float unit = 150;
+    
+    return CGSizeMake(unit, unit*25/30);
+}
+//每个section中不同的行之间的行间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 2;
+}
+//每个item之间的间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 0;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    EDUGroupCourseListCourseList *item = [self.model.info.courseList objectAtIndex:indexPath.row];
+    
+    [Configuration Instance].current_course_id = item.courseListIdentifier;
+    [Configuration Instance].current_video_url_title = item.title;
+    
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    
+    UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"CourseDetailViewController"];
+    
+    self.navigationController.navigationBarHidden = FALSE;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+@end
+//
+//  FirstPageViewControllerV2.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/12.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "FirstPageViewControllerV2.h"
+#import "UIViewController+SimulateContainer.h"
+#import "UIViewController+Login.h"
+#import "UITableView+RereshHead.h"
+#import "JSONHTTPClient.h"
+#import "SearchResultViewController.h"
+
+#import "DramaClubListViewController.h"
+#import "UISearchBar+FMAdd.h"
+#import "FirstPageGroupCourseViewController.h"
+
+#import "UIButton+Expand.h"
+#import "WEPopoverController.h"
+
+@interface FirstPageViewControllerV2 ()
+
+@property (strong,nonatomic) UIViewController *vc0;
+@property (strong,nonatomic) UIViewController *vc1;
+@property (strong,nonatomic) UIViewController *vc2;
+@property (strong,nonatomic) DramaClubListViewController *vc3;
+@property (strong,nonatomic) UIViewController *vc4;
+
+@property (strong,nonatomic) WEPopoverController *wePopoverController;
+
+@end
+
+@implementation FirstPageViewControllerV2
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    
+    // 添加到self.navigationItem.titleView中
+    self.navigationItem.titleView = self.searchController.searchBar;
+    self.definesPresentationContext = YES;
+    
+    // 添加到self.view中
+    [self.view addSubview:self.tableView];
+    
+    self.tableView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        return [RACSignal empty];
+    }];
+
+    self.vc0 = [self.storyboard instantiateViewControllerWithIdentifier:@"AdvertismentViewController"];
+    self.vc1 = [self.storyboard instantiateViewControllerWithIdentifier:@"WonderfulArticlesViewController"];
+    self.vc2 = [self.storyboard instantiateViewControllerWithIdentifier:@"WorksListViewController"];
+    self.vc3 = [self.storyboard instantiateViewControllerWithIdentifier:@"DramaClubListViewController"];
+    self.vc4 = [self.storyboard instantiateViewControllerWithIdentifier:@"FirstPageGroupCourseViewController"];
+    
+    self.vc3.maxShowCount = 6;
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:YES];
+
+    if ([self isLogin]) {
+        ;
+    }
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - UITableView dataSource
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView{
+    return 1;
+}
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    return 6;
+}
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    switch (indexPath.row) {
+        case 0:
+        {
+            static NSString *identifier = @"cell_0";
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+            UIView *ad = [cell viewWithTag:100];
+            [self bindConstainerTo:self.vc0 withView:ad];
+            //[self bindConstainer:@"AdvertismentViewController" withView:ad];
+            
+            {
+                @weakify(self);
+                UIButton *moreButton = [cell viewWithTag:101];
+                [moreButton setEnlargeEdge:10]; 
+
+                moreButton.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+                    @strongify(self);
+                    if (self.wePopoverController) {
+                        [self.wePopoverController dismissPopoverAnimated:YES];
+                        self.wePopoverController = nil;
+                    } else {
+                        UIViewController *contentViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"QuationHint1"];  // this is the storyboard id
+                        
+                        self.wePopoverController = [[WEPopoverController alloc] initWithContentViewController:contentViewController];
+                        [self.wePopoverController presentPopoverFromRect:moreButton.frame
+                                                                  inView:moreButton.superview
+                                                permittedArrowDirections:UIPopoverArrowDirectionUp
+                                                                animated:YES];
+                    }
+                    return  [RACSignal empty];
+                }];
+            }
+            
+            {
+                UIButton *btn1 = [cell viewWithTag:110];
+                btn1.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+                    [Configuration Instance].current_group_id = 23;
+                    
+                    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+                    UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"GroupCourseListCollectionViewController"];
+                    [self.navigationController pushViewController:vc animated:YES];
+                    return  [RACSignal empty];
+                }];
+            }
+            
+            {
+                UIButton *btn1 = [cell viewWithTag:120];
+                btn1.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+                    [Configuration Instance].current_group_id = 24;
+                    
+                    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+                    UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"GroupCourseListCollectionViewController"];
+                    [self.navigationController pushViewController:vc animated:YES];
+                    return  [RACSignal empty];
+                }];
+            }
+            
+            {
+                UIButton *btn1 = [cell viewWithTag:130];
+                btn1.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+                    [Configuration Instance].current_group_id = 25;
+                    
+                    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+                    UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"GroupCourseListCollectionViewController"];
+                    [self.navigationController pushViewController:vc animated:YES];
+                    return  [RACSignal empty];
+                }];
+            }
+            
+            /**
+            {
+                UIButton *btn1 = [cell viewWithTag:140];
+                btn1.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+                    [Configuration Instance].current_group_id = 22;
+                    
+                    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+                    UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"GroupCourseListCollectionViewController"];
+                    [self.navigationController pushViewController:vc animated:YES];
+                    return  [RACSignal empty];
+                }];
+            }
+             */
+            return cell;
+        }
+            break;
+        case 4:
+        {
+            static NSString *identifier = @"cell_4";
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+            UIView *ad = [cell viewWithTag:100];
+            [self bindConstainerTo:self.vc1 withView:ad];
+            //[self bindConstainer:@"WonderfulArticlesViewController" withView:ad];
+            return cell;
+        }
+            break;
+        case 2:
+        {
+            static NSString *identifier = @"cell_2";
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+            UIView *ad = [cell viewWithTag:100];
+            [self bindConstainerTo:self.vc2 withView:ad];
+            //[self bindConstainer:@"WorksListViewController" withView:ad];
+            return cell;
+        }
+            break;
+        case 3:
+        {
+            static NSString *identifier = @"cell_3";
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+            UIView *ad = [cell viewWithTag:100];
+            [self bindConstainerTo:self.vc3 withView:ad];
+            //[self bindConstainer:@"WorksListViewController" withView:ad];
+            return cell;
+        }
+        case 1:
+        {
+            static NSString *identifier = @"cell_1";
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+            UIView *ad = [cell viewWithTag:100];
+            [self bindConstainerTo:self.vc4 withView:ad];
+            return cell;
+        }
+            break;
+        case 5:
+        {
+            static NSString *identifier = @"cell_5";
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+            return cell;
+        }
+            break;
+        default:
+            break;
+    }
+    
+    return nil;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    switch (indexPath.row) {
+        case 0:
+            return 270.0;
+            break;
+        case 4:
+            return 190.0;
+            break;
+        case 2:
+            return 170;
+            break;
+        case 3:
+            return Main_Screen_Width*210*2/240/3 + 40;
+            break;
+        case 1:
+            return 165.0;
+            break;
+        case 5:
+            return 20;
+            break;
+        default:
+            break;
+    }
+    return 0.0;
+}
+
+#pragma mark - UITableView delegate
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [self.view endEditing:YES];
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+#pragma mark - UISearchController UISearchControllerDelegate
+// These methods are called when automatic presentation or dismissal occurs. They will not be called if you present or dismiss the search controller yourself.
+- (void)willPresentSearchController:(UISearchController *)searchController {
+    
+}
+- (void)didPresentSearchController:(UISearchController *)searchController {
+    
+}
+- (void)willDismissSearchController:(UISearchController *)searchController {
+    
+}
+- (void)didDismissSearchController:(UISearchController *)searchController {
+    
+}
+
+// Called after the search controller's search bar has agreed to begin editing or when 'active' is set to YES. If you choose not to present the controller yourself or do not implement this method, a default presentation is performed on your behalf.
+- (void)presentSearchController:(UISearchController *)searchController {
+    
+}
+
+#pragma mark - 实例化
+
+- (UISearchController *)searchController {
+    if (!_searchController) {
+        
+        SearchResultViewController *resultsController = [self.storyboard instantiateViewControllerWithIdentifier:@"SearchResultViewController"];
+        
+        UISearchController *searchController = [[UISearchController alloc] initWithSearchResultsController:resultsController];
+        
+        //set search bar
+        resultsController.searchBar = searchController.searchBar;
+        resultsController.parent = self;
+        
+        searchController.delegate = self;
+        //searchController.searchResultsUpdater = resultsController;
+        [searchController.searchBar sizeToFit];
+        searchController.dimsBackgroundDuringPresentation = YES;        //是否添加半透明覆盖层
+        searchController.hidesNavigationBarDuringPresentation = NO;    //是否隐藏导航栏
+        
+        // 这里还可以自定义searchController.searchBar。UISearchBar的属性都可以设置
+        searchController.searchBar.placeholder = @"课程、视频、戏剧社、专题";
+        
+        //设置背景图是为了去掉上下黑线
+        
+        //1. 设置背景颜色
+        //设置背景图是为了去掉上下黑线
+        searchController.searchBar.backgroundImage = [[UIImage alloc] init];
+        // 设置SearchBar的颜色主题为白色
+        searchController.searchBar.barTintColor = [UIColor whiteColor];
+        
+        //2. 设置圆角和边框颜色
+        UITextField *searchField = [searchController.searchBar valueForKey:@"searchField"];
+        if (searchField) {
+            [searchField setBackgroundColor:[UIColor whiteColor]];
+            searchField.layer.cornerRadius = 14.0f;
+            searchField.layer.borderColor = COLOR_LITLE_GREE.CGColor;
+            searchField.layer.borderWidth = 1;
+            searchField.layer.masksToBounds = YES;
+        }
+        
+        //3. 设置按钮文字和颜色
+        [searchController.searchBar fm_setCancelButtonTitle:@"取消"];
+        searchController.searchBar.tintColor = COLOR_LITLE_GREE;
+        //设置取消按钮字体
+        [searchController.searchBar fm_setCancelButtonFont:[UIFont systemFontOfSize:18]];
+        //修正光标颜色
+        [searchField setTintColor:[UIColor blackColor]];
+        
+        //4. 设置输入框文字颜色和字体
+        [searchController.searchBar fm_setTextColor:[UIColor blackColor]];
+        [searchController.searchBar fm_setTextFont:[UIFont systemFontOfSize:14]];
+        
+        _searchController = searchController;
+    }
+    return _searchController;
+}
+
+@end
+//
+//  GroupCourseListCollectionViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/14.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "GroupCourseListCollectionViewController.h"
+#import "UICollectionView+Empty.h"
+#import "EDUGroupCourseListDataModels.h"
+#import "UIImageView+WebCache.h"
+#import "UIScrollView+Scroll.h"
+#import "JSONHttpClient.h"
+
+@interface GroupCourseListCollectionViewController ()
+
+@property (nonatomic,strong) EDUGroupCourseListBaseClass* model;
+
+@end
+
+@implementation GroupCourseListCollectionViewController
+
+static NSString * const reuseIdentifier = @"group_cell";
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+    // Do any additional setup after loading the view.
+    self.navigationItem.title = @"";
+    
+    self.collectionView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        //
+        
+        NSDictionary* para= @{@"group_id":[[NSNumber numberWithDouble:[Configuration Instance].current_group_id] stringValue]
+                              };
+        
+        [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/resGroupCourseList.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
+            //
+            self.model = [[EDUGroupCourseListBaseClass alloc] initWithDictionary:json];
+            self.navigationItem.title = self.model.info.group.longTitle;
+            //self.navigationItem.title =  [NSString stringWithFormat:@" %@ ", self.model.info.group.longTitle ];
+            
+            [self.collectionView reloadData];
+        }];
+        return [RACSignal empty];
+    }];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    if(self.model)
+        self.navigationItem.title = self.model.info.group.longTitle;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+#pragma mark <UICollectionViewDataSource>
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    
+    return 1;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return [self.model.info.courseList count];
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    
+    EDUGroupCourseListCourseList *item = [self.model.info.courseList objectAtIndex:indexPath.row];
+    
+    {
+        UIImageView *image = [cell viewWithTag:100];
+        
+        [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.thumb] URLEncodedString]]];
+        
+        UITapGestureRecognizer *myTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewClicked:)];
+        image.userInteractionEnabled = YES;
+        [image addGestureRecognizer:myTapGesture];
+    }
+    {
+        UILabel *text = [cell viewWithTag:110];
+        text.text = item.title;
+    }
+    {
+        UILabel *text = [cell viewWithTag:120];
+        text.text = @"";
+        //text.text = [NSString stringWithFormat:@"%0.0f", item.duration];
+    }
+    
+    {
+        UILabel *text = [cell viewWithTag:130];
+        text.text = item.timeShow;
+    }
+    
+    [cell layoutIfNeeded];
+    return cell;
+}
+
+#pragma mark <UICollectionViewDelegate>
+
+/*
+ // Uncomment this method to specify if the specified item should be highlighted during tracking
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
+	return YES;
+ }
+ */
+
+/*
+ // Uncomment this method to specify if the specified item should be selected
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+ return YES;
+ }
+ */
+
+/*
+ // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
+	return NO;
+ }
+ 
+ - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	return NO;
+ }
+ 
+ - (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	
+ }
+ */
+
+//- (CGSize)collectionViewContentSize
+//{
+//    float unit = [UIScreen mainScreen].bounds.size.width;
+//    return CGSizeMake(unit, unit);
+//}
+
+//定义每个UICollectionViewCell 的大小
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    float unit = ([UIScreen mainScreen].bounds.size.width-4)/2;
+    
+    return CGSizeMake(unit, unit*258/375);
+}
+//每个section中不同的行之间的行间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 2;
+}
+//每个item之间的间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 0;
+}
+
+
+-(void)imageViewClicked:(UITapGestureRecognizer*)gestRecognizer
+{
+    UIImageView* iv = (UIImageView*)gestRecognizer.view;
+    NSInteger tag = iv.tag; // then do what you want with this
+    
+    // or get the cell by going up thru the superviews until you find it
+    UIView* cellView = iv;
+    while(cellView && ![cellView isKindOfClass:[UICollectionViewCell class]])
+        cellView = cellView.superview; // go up until you find a cell
+    
+    // Then get its indexPath
+    UICollectionViewCell* cell = (UICollectionViewCell*)cellView;
+    NSIndexPath* indexPath = [self.collectionView indexPathForCell:cell];
+    EDUGroupCourseListCourseList *item = [self.model.info.courseList objectAtIndex:indexPath.row];
+    
+    [Configuration Instance].current_course_id = item.courseListIdentifier;
+    [Configuration Instance].current_video_url_title = item.title;
+    
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    
+    UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"CourseDetailViewController"];
+    
+//    self.navigationController.navigationBarHidden = FALSE;
+    self.navigationItem.title = @"";
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    [self.collectionView.scrollDelegate scrollViewDidScroll:scrollView];
+}
+
+-(void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    [self.collectionView.scrollDelegate scrollViewDidEndDecelerating:scrollView];
+}
+
+@end
+//
+//  MyModel.m
+//  UISearchController
+//
+//  Created by 思久科技 on 16/8/5.
+//  Copyright © 2016年 Seejoys. All rights reserved.
+//
+
+#import "MyModel.h"
+
+@implementation MyModel
+
+
+@end
+//
+//  PopoverViewController1.m
+//  EDU
+//
+//  Created by renxingguo on 2016/11/29.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "PopoverViewController1.h"
+
+@interface PopoverViewController1 ()
+
+@end
+
+@implementation PopoverViewController1
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    if ([self respondsToSelector:@selector(setPreferredContentSize:)]) {
+        self.preferredContentSize = CGSizeMake(115, 80);
+    }
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+@end
+//
+//  PureSearchViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/11/11.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "PureSearchViewController.h"
+#import "SearchResultViewController.h"
+
+#import "DramaClubListViewController.h"
+#import "UISearchBar+FMAdd.h"
+
+@interface PureSearchViewController ()
+
+@end
+
+@implementation PureSearchViewController
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    
+    // 添加到self.navigationItem.titleView中
+    self.navigationItem.titleView = self.searchController.searchBar;
+    self.definesPresentationContext = YES;
+    
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:YES];
+
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - UISearchController UISearchControllerDelegate
+// These methods are called when automatic presentation or dismissal occurs. They will not be called if you present or dismiss the search controller yourself.
+- (void)willPresentSearchController:(UISearchController *)searchController {
+    
+}
+- (void)didPresentSearchController:(UISearchController *)searchController {
+    
+}
+- (void)willDismissSearchController:(UISearchController *)searchController {
+    
+}
+- (void)didDismissSearchController:(UISearchController *)searchController {
+    
+}
+
+// Called after the search controller's search bar has agreed to begin editing or when 'active' is set to YES. If you choose not to present the controller yourself or do not implement this method, a default presentation is performed on your behalf.
+- (void)presentSearchController:(UISearchController *)searchController {
+    
+}
+
+#pragma mark - 实例化
+
+- (UISearchController *)searchController {
+    if (!_searchController) {
+        
+        SearchResultViewController *resultsController = [self.storyboard instantiateViewControllerWithIdentifier:@"SearchResultViewController"];
+        
+        UISearchController *searchController = [[UISearchController alloc] initWithSearchResultsController:resultsController];
+        
+        //set search bar
+        resultsController.searchBar = searchController.searchBar;
+        resultsController.parent = self;
+        
+        searchController.delegate = self;
+        //searchController.searchResultsUpdater = resultsController;
+        [searchController.searchBar sizeToFit];
+        searchController.dimsBackgroundDuringPresentation = YES;        //是否添加半透明覆盖层
+        searchController.hidesNavigationBarDuringPresentation = NO;    //是否隐藏导航栏
+        
+        // 这里还可以自定义searchController.searchBar。UISearchBar的属性都可以设置
+        searchController.searchBar.placeholder = @"课程、视频、戏剧社、专题";
+        
+        //设置背景图是为了去掉上下黑线
+        
+        //1. 设置背景颜色
+        //设置背景图是为了去掉上下黑线
+        searchController.searchBar.backgroundImage = [[UIImage alloc] init];
+        // 设置SearchBar的颜色主题为白色
+        searchController.searchBar.barTintColor = [UIColor whiteColor];
+        
+        //2. 设置圆角和边框颜色
+        UITextField *searchField = [searchController.searchBar valueForKey:@"searchField"];
+        if (searchField) {
+            [searchField setBackgroundColor:[UIColor whiteColor]];
+            searchField.layer.cornerRadius = 14.0f;
+            searchField.layer.borderColor = COLOR_LITLE_GREE.CGColor;
+            searchField.layer.borderWidth = 1;
+            searchField.layer.masksToBounds = YES;
+        }
+        
+        //3. 设置按钮文字和颜色
+        [searchController.searchBar fm_setCancelButtonTitle:@"取消"];
+        searchController.searchBar.tintColor = COLOR_LITLE_GREE;
+        //设置取消按钮字体
+        [searchController.searchBar fm_setCancelButtonFont:[UIFont systemFontOfSize:18]];
+        //修正光标颜色
+        [searchField setTintColor:[UIColor blackColor]];
+        
+        //4. 设置输入框文字颜色和字体
+        [searchController.searchBar fm_setTextColor:[UIColor blackColor]];
+        [searchController.searchBar fm_setTextFont:[UIFont systemFontOfSize:14]];
+        
+        _searchController = searchController;
+    }
+    return _searchController;
+}
+
+@end
+//
+//  SearchResultViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/13.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "SearchResultViewController.h"
+#import "UIButton+WebCache.h"
+#import "UIButton+SetCropImage.h"
+#import "Toast.h"
+#import "UITableView+RereshHead.h"
+#import "SearchTableViewCell.h"
+#import "SearchTableViewCell_Blog.h"
+#import "UITableView+LoadMore.h"
+
+#import "EDUSearchResultDataModels.h"
+#import "ProgressHUD.h"
+#import "JSONHttpClient.h"
+#import "UIButton+SetCropImage.h"
+#import "UIImageView+WebCache.h"
+
+#import "QQPlayViewController.h"
+
+@interface SearchResultViewController ()<UITableViewDataSource,UITableViewDelegate,UISearchBarDelegate>
+
+@property (strong,nonatomic) NSArray *resultArray;
+@property (strong,nonatomic) NSString *keywords;
+@property (strong,nonatomic) NSNumber *modelType;
+@end
+
+@implementation SearchResultViewController
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations.
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
+    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    
+    UITextField *txfSearchField = [_searchBar valueForKey:@"_searchField"];
+    txfSearchField.backgroundColor = [UIColor whiteColor];
+    txfSearchField.borderStyle = UITextBorderStyleLine;
+    txfSearchField.layer.borderWidth = 0.5;
+    
+    self.resultArray = [NSArray array];
+    self.modelType = [NSNumber numberWithInt:100];
+    
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    
+    self.tableView.rowHeight = UITableViewAutomaticDimension;
+    self.tableView.estimatedRowHeight = 60;
+    
+    //enter keyword:
+    self.searchBar.delegate = self;
+    
+    @weakify(self);
+    [[self rac_signalForSelector:@selector(searchBar:textDidChange:)fromProtocol:@protocol(UISearchBarDelegate)] subscribeNext:^(RACTuple *x)
+     {
+         self.keywords = x.second;
+         self.modelType = [NSNumber numberWithInt:100];
+         [self.tableView reloadData];
+     }];
+    
+    //select
+    [[self rac_signalForSelector:@selector(tableView:didSelectRowAtIndexPath:) fromProtocol:@protocol(UITableViewDelegate)] subscribeNext:^(RACTuple *x) {
+        @strongify(self);
+        if ([self.modelType integerValue]==1 || [self.modelType integerValue]==3) {
+            NSIndexPath *indexPath = x.second;
+            //todo
+            UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+            //[cell.buyButton.rac_command execute:nil];
+            EDUSearchResultList *item = [self.resultArray objectAtIndex:indexPath.row];
+            [Configuration Instance].current_course_id = item.listIdentifier;
+            UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+            
+            UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"CourseDetailViewController"];
+            [self.parent.navigationController pushViewController:vc animated:YES];
+        }
+        
+        if ([self.modelType integerValue]==2 || [self.modelType integerValue]==4 ) {
+            NSIndexPath *indexPath = x.second;
+            //[cell.buyButton.rac_command execute:nil];
+            EDUSearchResultList *item = [self.resultArray objectAtIndex:indexPath.row];
+            [Configuration Instance].current_video_url = item.url;
+            [Configuration Instance].current_video_url_title = item.title;
+            QQPlayViewController *vc = [[QQPlayViewController alloc] init];
+            
+            [self.parent.navigationController pushViewController:vc animated:YES];
+        }
+        
+        if ([self.modelType integerValue]==100) {
+            NSIndexPath *indexPath = x.second;
+            self.modelType = [NSNumber numberWithInt:(indexPath.row + 1)];
+            [self.searchBar resignFirstResponder];
+        }
+        
+        //other
+    }];
+    
+    //query & reload
+    [RACObserve(self, modelType) subscribeNext:^(id x) {
+        //
+        //search
+        switch ([self.modelType integerValue]) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+                break;
+                
+            default:
+                return;
+                break;
+        }
+        self.resultArray = [NSArray array];
+        [self loadPage:1];
+        
+        
+        self.tableView.loadPageCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(NSNumber *pageIndex) {
+            //
+            /**
+             * **Parameters:**
+             * `type` — 【必须】搜索的单元类型  1:课程，2：精彩专题，3：戏剧社，4：作品赏析
+             * `keywords` — 【必须】关键字，多个关键字以逗号分隔
+             * `pageNum` — 当前页码 （从1开始，默认为1）
+             * `user_id` — (默认为非注册用户)
+             * **Returns:** info{
+             
+             curPage    当前页码
+             
+             curNum     当前结果数
+             
+             list       结果集（最多20条记录）
+             
+             }
+             */
+            NSString *typeConverted = [self.modelType stringValue];
+            if([self.modelType integerValue] == 3)
+            {
+                typeConverted = @"4";
+            }
+            if([self.modelType integerValue] == 4)
+            {
+                typeConverted = @"3";
+            }
+            
+            NSDictionary *para = @{@"type":typeConverted,
+                                   @"keywords":self.keywords,
+                                   @"pageNum":pageIndex
+                                   };
+            
+            [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/indexSearchList.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
+                //
+                
+                EDUSearchResultBaseClass *model = [[EDUSearchResultBaseClass alloc] initWithDictionary:json];
+                
+                if (!model.code)
+                {
+                    UIAlertView *alter = [[UIAlertView alloc]initWithTitle:@"系统提示" message:model.message delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+                    [alter show];
+                }
+                else
+                {
+                    NSMutableArray *array = [NSMutableArray arrayWithArray:self.resultArray];
+                    [array addObjectsFromArray:model.info.list];
+                    self.resultArray = array;
+                    [self.tableView reloadData];
+                }
+                
+            }];
+            
+            return [RACSignal empty];
+            
+            
+        }];
+    }];
+    
+    
+    
+}
+
+- (void)loadPage:(int)pageNumber
+{
+    /**
+     * 通用搜索接口，包括品牌、服装、顾问师、博文
+     * @param paramMap
+     * @param model 1品牌，2服装，3顾问师，4博文
+     * @param keyword 搜索关键字
+     * @return
+     * @throws Exception
+     * @author fengym
+     完整调用示例
+     http://115.28.139.3:8080/commSearch.json?model=1&keyword=女&page_index=1&page_size=10
+     */
+    
+    [ProgressHUD show:@"正在检索"];
+    
+    
+    NSString *typeConverted = [self.modelType stringValue];
+    if([self.modelType integerValue] == 3)
+    {
+        typeConverted = @"4";
+    }
+    if([self.modelType integerValue] == 4)
+    {
+        typeConverted = @"3";
+    }
+    
+    NSDictionary *para = @{@"type":typeConverted,
+                           @"keywords":self.keywords,
+                           @"pageNum": [NSNumber numberWithInt:pageNumber]
+                           };
+    
+    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/indexSearchList.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
+        //
+        
+        EDUSearchResultBaseClass *model = [[EDUSearchResultBaseClass alloc] initWithDictionary:json];
+        
+        if (!model.code)
+        {
+            UIAlertView *alter = [[UIAlertView alloc]initWithTitle:@"系统提示" message:model.message delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+            [alter show];
+        }
+        else
+        {
+            self.resultArray = model.info.list;
+            [self.tableView reloadData];
+        }
+        [ProgressHUD dismiss];
+    }];
+    
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Table view data source
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    
+    switch ([self.modelType integerValue]) {
+        case 100:
+            
+            if ([self.keywords length]) {
+                return 4;
+            }
+            else
+                return 0;
+            break;
+            
+        default:
+            break;
+    }
+    return [self.resultArray count];
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    switch ([self.modelType integerValue])
+    {
+        case 100:
+        {
+            NSString *identifier = @"SearchCell_1";
+            switch (indexPath.row) {
+                case 0:
+                    identifier = @"SearchCell_1";
+                    break;
+                case 1:
+                    identifier = @"SearchCell_2";
+                    break;
+                case 2:
+                    identifier = @"SearchCell_3";
+                    break;
+                case 3:
+                    identifier = @"SearchCell_4";
+                    break;
+                default:
+                    break;
+                    
+            }
+            SearchTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier forIndexPath:indexPath];
+            cell.keyWordsLable.text = self.keywords;
+            return cell;
+            
+        }
+            
+            break;
+            
+            //show attire search resul
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        {
+            NSString *identifier = @"others_cell";
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier forIndexPath:indexPath];
+            EDUSearchResultList *item = [self.resultArray objectAtIndex:indexPath.row];
+            {
+                UIImageView *image = [cell viewWithTag:100];
+                [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.thumb] URLEncodedString]]];
+            }
+            {
+                UILabel *text = [cell viewWithTag:110];
+                text.text = item.title;
+            }
+            {
+                UILabel *text = [cell viewWithTag:120];
+                text.text = item.descr;
+            }
+            return cell;
+        }
+            break;
+            
+        default:
+            break;
+    }
+    
+    return Nil;
+}
+
+
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    //    if ([self.modelType integerValue] != 100) {
+    //        if (indexPath.row == [self.resultArray count] - 1 ) {
+    //            [self loadPage:++self.currentPage];
+    //        }
+    //    }
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+}
+
+
+@end
+//
+//  SubjectViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/14.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "SubjectViewController.h"
+#import "UICollectionView+Empty.h"
+#import "EDUResGroupListDataModels.h"
+#import "UIImageView+WebCache.h"
+#import "UIScrollView+Scroll.h"
+#import "JSONHttpClient.h"
+
+@interface SubjectViewController ()
+
+@property (nonatomic,strong) EDUResGroupListBaseClass* model;
+
+@end
+
+@implementation SubjectViewController
+
+
+static NSString * const reuseIdentifier = @"group_cell";
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+    // Do any additional setup after loading the view.
+    
+    self.collectionView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        //
+        [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/resGroupList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+            //
+            self.model = [[EDUResGroupListBaseClass alloc] initWithDictionary:json];
+            [self.collectionView reloadData];
+        }];
+        return [RACSignal empty];
+    }];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+#pragma mark <UICollectionViewDataSource>
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    
+    return 1;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return [self.model.info count];
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    
+    EDUResGroupListInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    {
+        UIImageView *image = [cell viewWithTag:100];
+        
+        [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.icon] URLEncodedString]]];
+        
+        UITapGestureRecognizer *myTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewClicked:)];
+        image.userInteractionEnabled = YES;
+        [image addGestureRecognizer:myTapGesture];
+    }
+    {
+        UILabel *text = [cell viewWithTag:110];
+        text.text = item.title;
+    }
+    {
+        UILabel *text = [cell viewWithTag:120];
+        text.text = @"";
+    }
+    
+    {
+        UILabel *text = [cell viewWithTag:130];
+        text.text = @"";
+    }
+    
+    [cell layoutIfNeeded];
+    return cell;
+}
+
+#pragma mark <UICollectionViewDelegate>
+
+/*
+ // Uncomment this method to specify if the specified item should be highlighted during tracking
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
+	return YES;
+ }
+ */
+
+/*
+ // Uncomment this method to specify if the specified item should be selected
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+ return YES;
+ }
+ */
+
+/*
+ // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
+	return NO;
+ }
+ 
+ - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	return NO;
+ }
+ 
+ - (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	
+ }
+ */
+
+//- (CGSize)collectionViewContentSize
+//{
+//    float unit = [UIScreen mainScreen].bounds.size.width;
+//    return CGSizeMake(unit, unit);
+//}
+
+//定义每个UICollectionViewCell 的大小
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    float unit = ([UIScreen mainScreen].bounds.size.width-4)/4;
+    
+    return CGSizeMake(unit, unit*1.2);
+}
+//每个section中不同的行之间的行间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 2;
+}
+//每个item之间的间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 1;
+}
+
+
+-(void)imageViewClicked:(UITapGestureRecognizer*)gestRecognizer
+{
+    
+    UIImageView* iv = (UIImageView*)gestRecognizer.view;
+    NSInteger tag = iv.tag; // then do what you want with this
+    
+    // or get the cell by going up thru the superviews until you find it
+    UIView* cellView = iv;
+    while(cellView && ![cellView isKindOfClass:[UICollectionViewCell class]])
+        cellView = cellView.superview; // go up until you find a cell
+    
+    // Then get its indexPath
+    UICollectionViewCell* cell = (UICollectionViewCell*)cellView;
+    NSIndexPath* indexPath = [self.collectionView indexPathForCell:cell];
+    EDUResGroupListInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    
+    [Configuration Instance].current_group_id = item.infoIdentifier;
+    
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+    UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"GroupCourseListCollectionViewController"];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+@end
+//
+//  UISearchBar+FMAdd.m
+//  FollowmeiOS
+//
+//  Created by Subo on 15/12/24.
+//  Copyright © 2015年 com.followme. All rights reserved.
+//
+
+#import "UISearchBar+FMAdd.h"
+
+#define IS_IOS9 [[UIDevice currentDevice].systemVersion doubleValue] >= 9
+
+@implementation UISearchBar (FMAdd)
+
+- (void)fm_setTextFont:(UIFont *)font {
+    if (IS_IOS9) {
+        [UITextField appearanceWhenContainedInInstancesOfClasses:@[[UISearchBar class]]].font = font;
+    }else {
+        [[UITextField appearanceWhenContainedIn:[UISearchBar class], nil] setFont:font];
+    }
+}
+
+- (void)fm_setTextColor:(UIColor *)textColor {
+    if (IS_IOS9) {
+        [UITextField appearanceWhenContainedInInstancesOfClasses:@[[UISearchBar class]]].textColor = textColor;
+    }else {
+        [[UITextField appearanceWhenContainedIn:[UISearchBar class], nil] setTextColor:textColor];
+    }
+}
+
+- (void)fm_setCancelButtonTitle:(NSString *)title {
+    if (IS_IOS9) {
+        [[UIBarButtonItem appearanceWhenContainedInInstancesOfClasses:@[[UISearchBar class]]] setTitle:title];
+    }else {
+        [[UIBarButtonItem appearanceWhenContainedIn:[UISearchBar class], nil] setTitle:title];
+    }
+}
+
+- (void)fm_setCancelButtonFont:(UIFont *)font {
+    NSDictionary *textAttr = @{NSFontAttributeName : font};
+    if (IS_IOS9) {
+        [[UIBarButtonItem appearanceWhenContainedInInstancesOfClasses:@[[UISearchBar class]]] setTitleTextAttributes:textAttr forState:UIControlStateNormal];
+    }else {
+        [[UIBarButtonItem appearanceWhenContainedIn:[UISearchBar class], nil] setTitleTextAttributes:textAttr forState:UIControlStateNormal];
+    }
+}
+
+@end
+//
+//  VideoListViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/14.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "VideoListViewController.h"
+
+#import "UICollectionView+Empty.h"
+#import "EDUWorksListDataModels.h"
+#import "UIImageView+WebCache.h"
+#import "UIScrollView+Scroll.h"
+#import "JSONHttpClient.h"
+
+@interface VideoListViewController ()
+
+@property (nonatomic,strong) EDUWorksListBaseClass* model;
+
+@end
+
+@implementation VideoListViewController
+
+
+static NSString * const reuseIdentifier = @"group_cell";
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+    // Do any additional setup after loading the view.
+
+     self.collectionView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+     //
+     [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaWorksList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+     //
+     self.model = [[EDUWorksListBaseClass alloc] initWithDictionary:json];
+     [self.collectionView reloadData];
+     }];
+     return [RACSignal empty];
+     }];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+#pragma mark <UICollectionViewDataSource>
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    
+    return 1;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return [self.model.info count];
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    
+    EDUWorksListInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    {
+        UIImageView *image = [cell viewWithTag:100];
+        
+        [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.thumb] URLEncodedString]]];
+        
+        UITapGestureRecognizer *myTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewClicked:)];
+        image.userInteractionEnabled = YES;
+        [image addGestureRecognizer:myTapGesture];
+    }
+    {
+        UILabel *text = [cell viewWithTag:110];
+        text.text = item.title;
+    }
+    {
+        UILabel *text = [cell viewWithTag:120];
+        text.text = item.descr;
+    }
+    
+    
+    [cell layoutIfNeeded];
+    return cell;
+}
+
+#pragma mark <UICollectionViewDelegate>
+
+/*
+ // Uncomment this method to specify if the specified item should be highlighted during tracking
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
+	return YES;
+ }
+ */
+
+/*
+ // Uncomment this method to specify if the specified item should be selected
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+ return YES;
+ }
+ */
+
+/*
+ // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
+	return NO;
+ }
+ 
+ - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	return NO;
+ }
+ 
+ - (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	
+ }
+ */
+
+//- (CGSize)collectionViewContentSize
+//{
+//    float unit = [UIScreen mainScreen].bounds.size.width;
+//    return CGSizeMake(unit, unit);
+//}
+
+//定义每个UICollectionViewCell 的大小
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    float unit = ([UIScreen mainScreen].bounds.size.width-4)/2;
+    
+    return CGSizeMake(unit, unit*28/36);
+}
+//每个section中不同的行之间的行间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 2;
+}
+//每个item之间的间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 0;
+}
+
+
+-(void)imageViewClicked:(UITapGestureRecognizer*)gestRecognizer
+{
+    
+    UIImageView* iv = (UIImageView*)gestRecognizer.view;
+    NSInteger tag = iv.tag; // then do what you want with this
+    
+    // or get the cell by going up thru the superviews until you find it
+    UIView* cellView = iv;
+    while(cellView && ![cellView isKindOfClass:[UICollectionViewCell class]])
+        cellView = cellView.superview; // go up until you find a cell
+    
+    // Then get its indexPath
+    UICollectionViewCell* cell = (UICollectionViewCell*)cellView;
+    NSIndexPath* indexPath = [self.collectionView indexPathForCell:cell];
+    EDUWorksListInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    [Configuration Instance].current_work_id = item.infoIdentifier;
+    [Configuration Instance].current_video_url_title = item.title;
+    
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+    
+    UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"WorksDetailTableViewController"];
+    
+    self.navigationController.navigationBarHidden = FALSE;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+@end
+//
+//  WEPopoverContentViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/11/29.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "WEPopoverContentViewController.h"
+
+@interface WEPopoverContentViewController ()
+
+@end
+
+@implementation WEPopoverContentViewController
+
+- (id)initWithStyle:(UITableViewStyle)style
+{
+    if ((self = [super initWithStyle:style])) {
+        if ([self respondsToSelector:@selector(setPreferredContentSize:)]) {
+            self.preferredContentSize = CGSizeMake(100, 1 * 44 -1);
+        }
+    }
+    return self;
+}
+
+#pragma mark - View lifecycle
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    self.tableView.rowHeight = 44.0;
+    self.view.backgroundColor = [UIColor clearColor];
+}
+
+#pragma mark - Table view data source
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    // Return the number of sections.
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    // Return the number of rows in the section.
+    return 3;
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *CellIdentifier = @"ContentCell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+    }
+    
+    cell.textLabel.text = [NSString stringWithFormat:@"Item %d", [indexPath row]];
+    cell.textLabel.textColor = [UIColor blackColor];
+    
+    return cell;
+}
+
+#pragma mark - Table view delegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // Navigation logic may go here. Create and push to another view controller.
+}
+
+/*
+ // Override to support conditional editing of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+ {
+ // Return NO if you do not want the specified item to be editable.
+ return YES;
+ }
+ */
+
+/*
+ // Override to support editing the table view.
+ - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+ {
+ if (editingStyle == UITableViewCellEditingStyleDelete) {
+ // Delete the row from the data source
+ [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+ } else if (editingStyle == UITableViewCellEditingStyleInsert) {
+ // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+ }
+ }
+ */
+
+/*
+ // Override to support rearranging the table view.
+ - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
+ {
+ }
+ */
+
+/*
+ // Override to support conditional rearranging of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
+ {
+ // Return NO if you do not want the item to be re-orderable.
+ return YES;
+ }
+ */
+
+/*
+ #pragma mark - Navigation
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+ {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+@end
+//
+//  WonderfulVideoViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/12.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "WonderfulArticlesViewController.h"
+#import "UICollectionView+Empty.h"
+#import "EDUArticlesDataModels.h"
+#import "UIImageView+WebCache.h"
+#import "UIScrollView+Scroll.h"
+#import "JSONHttpClient.h"
+#import "HZYLIistTabBarViewController.h"
+#import "UIButton+Expand.h"
+
+#import "WEPopoverController.h"
+
+@interface WonderfulArticlesViewController ()<UICollectionViewDelegate,UICollectionViewDataSource>
+
+@property (nonatomic,strong) EDUArticlesBaseClass* model;
+
+@property (nonatomic,strong) WEPopoverController *wePopoverController;
+
+@end
+
+@implementation WonderfulArticlesViewController
+
+
+static NSString * const reuseIdentifier = @"group_cell";
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+    // Do any additional setup after loading the view.
+    /**
+     self.collectionView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+     //
+     [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaArticlesClsList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+     //
+     self.model = [[EDUArticlesBaseClass alloc] initWithDictionary:json];
+     [self.collectionView reloadData];
+     }];
+     return [RACSignal empty];
+     }];
+     */
+    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaArticlesClsList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+        //
+        self.model = [[EDUArticlesBaseClass alloc] initWithDictionary:json];
+        [self.collectionView reloadData];
+    }];
+    
+    UIButton *moreButton = [self.view viewWithTag:100];
+    [moreButton setEnlargeEdge:10];
+    
+//    {
+//        @weakify(self);
+//        moreButton.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+//            @strongify(self);
+//            if (self.wePopoverController) {
+//                [self.wePopoverController dismissPopoverAnimated:YES];
+//                self.wePopoverController = nil;
+//            } else {
+//                UIViewController *contentViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"QuationHint1"];  // this is the storyboard id
+//                
+//                self.wePopoverController = [[WEPopoverController alloc] initWithContentViewController:contentViewController];
+//                [self.wePopoverController presentPopoverFromRect:moreButton.frame
+//                                                          inView:self.view
+//                                        permittedArrowDirections:UIPopoverArrowDirectionUp
+//                                                        animated:YES];
+//            }
+//            return  [RACSignal empty];
+//        }];
+//    }
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+#pragma mark <UICollectionViewDataSource>
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    
+    return 1;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return [self.model.info count];
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    
+    EDUArticlesInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    {
+        UIImageView *image = [cell viewWithTag:100];
+        
+        [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.pic] URLEncodedString]]];
+        
+        UITapGestureRecognizer *myTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewClicked:)];
+        image.userInteractionEnabled = YES;
+        [image addGestureRecognizer:myTapGesture];
+    }
+    {
+        UILabel *text = [cell viewWithTag:110];
+        text.text = item.name;
+    }
+    {
+        UILabel *text = [cell viewWithTag:120];
+        text.text = @"";
+    }
+    
+    {
+        UILabel *text = [cell viewWithTag:130];
+        text.text = @"";
+    }
+    
+    [cell layoutIfNeeded];
+    return cell;
+}
+
+#pragma mark <UICollectionViewDelegate>
+
+/*
+ // Uncomment this method to specify if the specified item should be highlighted during tracking
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
+	return YES;
+ }
+ */
+
+/*
+ // Uncomment this method to specify if the specified item should be selected
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+ return YES;
+ }
+ */
+
+/*
+ // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
+	return NO;
+ }
+ 
+ - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	return NO;
+ }
+ 
+ - (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	
+ }
+ */
+
+//- (CGSize)collectionViewContentSize
+//{
+//    float unit = [UIScreen mainScreen].bounds.size.width;
+//    return CGSizeMake(unit, unit);
+//}
+
+//定义每个UICollectionViewCell 的大小
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    float unit = ([UIScreen mainScreen].bounds.size.width-2)/2;
+    
+    return CGSizeMake(unit, 50);
+}
+//每个section中不同的行之间的行间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 1;
+}
+//每个item之间的间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 1;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    EDUArticlesInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+    HZYLIistTabBarViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"HZYLIistTabBarViewController"];
+    vc.scrollToIndex = item.infoIdentifier;
+    
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+-(void)imageViewClicked:(UITapGestureRecognizer*)gestRecognizer
+{
+    
+    UIImageView* iv = (UIImageView*)gestRecognizer.view;
+    NSInteger tag = iv.tag; // then do what you want with this
+    
+    // or get the cell by going up thru the superviews until you find it
+    UIView* cellView = iv;
+    while(cellView && ![cellView isKindOfClass:[UICollectionViewCell class]])
+        cellView = cellView.superview; // go up until you find a cell
+    
+    // Then get its indexPath
+    UICollectionViewCell* cell = (UICollectionViewCell*)cellView;
+    NSIndexPath* indexPath = [self.collectionView indexPathForCell:cell];
+    EDUArticlesInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+    HZYLIistTabBarViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"HZYLIistTabBarViewController"];
+    vc.scrollToIndex = item.infoIdentifier;
+    
+    [self.navigationController pushViewController:vc animated:YES];
+    
+}
+
+@end
+//
+//  WonderfulArticlesViewControllerV2.m
+//  EDU
+//
+//  Created by renxingguo on 2016/11/25.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "WonderfulArticlesViewControllerV2.h"
+#import "UICollectionView+Empty.h"
+#import "EDUArticlesDataModels.h"
+#import "UIImageView+WebCache.h"
+#import "UIScrollView+Scroll.h"
+#import "JSONHttpClient.h"
+#import "HZYLIistTabBarViewController.h"
+#import "UIButton+Expand.h"
+
+@interface WonderfulArticlesViewControllerV2 ()<UICollectionViewDelegate,UICollectionViewDataSource>
+
+@property (nonatomic,strong) EDUArticlesBaseClass* model;
+
+@end
+
+@implementation WonderfulArticlesViewControllerV2
+
+
+static NSString * const reuseIdentifier = @"group_cell";
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+    // Do any additional setup after loading the view.
+    /**
+     self.collectionView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+     //
+     [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaArticlesClsList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+     //
+     self.model = [[EDUArticlesBaseClass alloc] initWithDictionary:json];
+     [self.collectionView reloadData];
+     }];
+     return [RACSignal empty];
+     }];
+     */
+    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaArticlesClsList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+        //
+        self.model = [[EDUArticlesBaseClass alloc] initWithDictionary:json];
+        [self.collectionView reloadData];
+    }];
+    
+    UIButton *moreButton = [self.view viewWithTag:100];
+    [moreButton setEnlargeEdge:10];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+#pragma mark <UICollectionViewDataSource>
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    
+    return 1;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return [self.model.info count];
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    
+    EDUArticlesInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    {
+        UIImageView *image = [cell viewWithTag:100];
+        
+        [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.pic] URLEncodedString]]];
+        
+        UITapGestureRecognizer *myTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewClicked:)];
+        image.userInteractionEnabled = YES;
+        [image addGestureRecognizer:myTapGesture];
+    }
+    {
+        UILabel *text = [cell viewWithTag:110];
+        text.text = item.name;
+    }
+    {
+        UILabel *text = [cell viewWithTag:120];
+        text.text = @"";
+    }
+    
+    {
+        UILabel *text = [cell viewWithTag:130];
+        text.text = @"";
+    }
+    
+    [cell layoutIfNeeded];
+    return cell;
+}
+
+#pragma mark <UICollectionViewDelegate>
+
+/*
+ // Uncomment this method to specify if the specified item should be highlighted during tracking
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
+	return YES;
+ }
+ */
+
+/*
+ // Uncomment this method to specify if the specified item should be selected
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+ return YES;
+ }
+ */
+
+/*
+ // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
+	return NO;
+ }
+ 
+ - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	return NO;
+ }
+ 
+ - (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	
+ }
+ */
+
+//- (CGSize)collectionViewContentSize
+//{
+//    float unit = [UIScreen mainScreen].bounds.size.width;
+//    return CGSizeMake(unit, unit);
+//}
+
+//定义每个UICollectionViewCell 的大小
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    float unit = ([UIScreen mainScreen].bounds.size.width-4)/2;
+    
+    return CGSizeMake(unit, 50);
+}
+//每个section中不同的行之间的行间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 1;
+}
+//每个item之间的间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 0;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    EDUArticlesInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+    HZYLIistTabBarViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"HZYLIistTabBarViewController"];
+    vc.scrollToIndex = item.infoIdentifier;
+    
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+-(void)imageViewClicked:(UITapGestureRecognizer*)gestRecognizer
+{
+    
+    UIImageView* iv = (UIImageView*)gestRecognizer.view;
+    NSInteger tag = iv.tag; // then do what you want with this
+    
+    // or get the cell by going up thru the superviews until you find it
+    UIView* cellView = iv;
+    while(cellView && ![cellView isKindOfClass:[UICollectionViewCell class]])
+        cellView = cellView.superview; // go up until you find a cell
+    
+    // Then get its indexPath
+    UICollectionViewCell* cell = (UICollectionViewCell*)cellView;
+    NSIndexPath* indexPath = [self.collectionView indexPathForCell:cell];
+    EDUArticlesInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+    HZYLIistTabBarViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"HZYLIistTabBarViewController"];
+    vc.scrollToIndex = item.infoIdentifier;
+    
+    [self.navigationController pushViewController:vc animated:YES];
+    
+}
+
+@end
+//
+//  WorksDetailTableViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/12.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "WorksDetailTableViewController.h"
+#import "ReactiveCocoa.h"
+#import "UITableView+RereshHead.h"
+#import "JSONHTTPClient.h"
+#import "EDUWorksGetDataModels.h"
+#import "UIImageView+WebCache.h"
+#import "QQPlayViewController.h"
+
+#import "UIButton+Badge.h"
+#import "UIButton+ZanAnimation.h"
+#import "UIImage+Tint.h"
+#import "UIButton+SetCropImage.h"
+
+#import "KRVideoPlayerController.h"
+#import "ZYShareView.h"
+
+@interface WorksDetailTableViewController ()
+
+@property (nonatomic,strong) EDUWorksGetBaseClass * model;
+@property (nonatomic, strong) KRVideoPlayerController *videoController;
+
+@end
+
+@implementation WorksDetailTableViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations.
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
+    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    self.navigationItem.title = [Configuration Instance].current_video_url_title;
+    
+    
+    self.tableView.rowHeight = UITableViewAutomaticDimension;
+    // Set the estimatedRowHeight to a non-0 value to enable auto layout.
+    self.tableView.estimatedRowHeight = 10;
+    
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    
+    self.tableView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        NSDictionary* para= @{
+                              @"work_id":  [[NSNumber numberWithDouble:[Configuration Instance].current_work_id] stringValue]
+                              };
+        
+        [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaWorksGet.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
+            //
+            self.model = [EDUWorksGetBaseClass modelObjectWithDictionary:json];
+            [self.tableView reloadData];
+        }];
+        
+        return [RACSignal empty];
+    }];
+    
+        UIView *v = self.tableView.tableHeaderView;
+        CGRect fr = v.frame;
+        fr.size.height = 1;
+        v.frame = fr;
+        [self.tableView updateConstraintsIfNeeded];
+    
+    //    NSDictionary* para= @{@"user_id": /**[Configuration Instance].userID*/@"9",
+    //                          @"course_id":  [[NSNumber numberWithDouble:[Configuration Instance].current_course_id] stringValue]
+    //                          };
+    //
+    //    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/resCourseDetail.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
+    //        //
+    //        self.model = [CourseDetailBaseClass modelObjectWithDictionary:json];
+    //        [self.tableView reloadData];
+    //    }];
+    
+    //self.tableView.contentInset = UIEdgeInsetsMake(-35, 0, 0, 0);
+}
+
+//- (void)viewWillAppear:(BOOL)animated
+//{
+//    self.navigationController.navigationBarHidden = FALSE;
+//}
+//
+//- (BOOL)prefersStatusBarHidden
+//{
+//    return YES;
+//}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Table view data source
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 2;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    if (section==0) {
+        return 1;
+    }
+    return 0;
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    if (indexPath.section==0) {
+        static NSString *CellIdentifier = @"detail_cell";
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        
+        EDUWorksGetInfo *item = self.model.info;
+        {
+            UIImageView *image = [cell viewWithTag:100];
+            [image setCropImageForNormalState:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.thumb] URLEncodedString]]];
+            //            [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.thumb] URLEncodedString]]];
+        }
+        {
+            UILabel *text = [cell viewWithTag:110];
+            text.text = item.title;
+        }
+        {
+            UILabel *text = [cell viewWithTag:120];
+            text.text = item.timeShow;
+        }
+        {
+            UILabel *text = [cell viewWithTag:130];
+            text.text = item.descr;
+        }
+        
+        //like
+        {
+            UIButton *btn = [cell viewWithTag:210];
+            UIImage *img = [[UIImage imageNamed:@"btn_love"] imageWithTintColor:COLOR_RED];
+            [btn setImage:img forState:UIControlStateSelected];
+            //btn.selected = item.hasFavourite;
+            btn.selected = false;
+            @weakify(self);
+            btn.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+                //
+                @strongify(self);
+                /**
+                NSDictionary* para= @{@"user_id": [Configuration Instance].userID,
+                                      @"course_id":  [[NSNumber numberWithDouble:item.courseIdentifier] stringValue]
+                                      };
+                
+                NSString *interface = @"recCourseFavoriteAddWt.json";
+                if (btn.selected) {
+                    interface = @"recCourseFavoriteDelWt.json";
+                }
+                
+                [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/%@",BASEURL,interface] params:para completion:^(id json, JSONModelError *err) {
+                    //
+                    btn.selected = !btn.selected;
+                    //                    [btn setBadgeWithNumber:100];
+                    [btn zanAnimation];
+                }];
+                 */
+                return [RACSignal empty];
+            }];
+                 
+        }
+        
+        {
+            UIButton *btn = [cell viewWithTag:200];
+            @weakify(self);
+            btn.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+                //
+                @strongify(self);
+                
+                [Configuration Instance].current_video_url = item.url;
+                
+//                NSMutableArray *records = [[NSMutableArray alloc] init];
+//                [records addObject:[item dictionaryRepresentation]];
+//                [records addObjectsFromArray:[Configuration Instance].historyPlayRecords];
+//                [Configuration Instance].historyPlayRecords = records;
+//                
+//                QQPlayViewController *vc = [[QQPlayViewController alloc] init];
+//                [self.navigationController showViewController:vc sender:nil];
+                
+                //play
+                {
+                    NSDictionary* para= @{@"user_id" :[Configuration Instance].userID,
+                                          @"course_id":  [[NSNumber numberWithDouble:[Configuration Instance].current_course_id] stringValue]
+                                          };
+                    
+                    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/recCoursePlayHisWt.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
+                    }];
+                }
+                
+                if ([[[Configuration Instance] current_video_url] hasSuffix:@"mp4"]) {
+                    [self playVideoWithURL: [NSURL URLWithString:[[Configuration Instance].current_video_url urlDecode]]  ];
+                }
+                else
+                {
+                    QQPlayViewController *vc = [[QQPlayViewController alloc] init];
+                    [self.navigationController showViewController:vc sender:nil];
+                }
+                
+                return [RACSignal empty];
+                
+                
+            }];
+        }
+        
+        {
+            UIButton *btn = [cell viewWithTag:201];
+            @weakify(self);
+            btn.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+                //
+                @strongify(self);
+                
+                UIImageView *image = [cell viewWithTag:100];
+                
+                __weak typeof(self) weakSelf = self;
+                
+                
+                // 创建代表每个按钮的模型
+                ZYShareItem *item0 = [ZYShareItem itemWithTitle:@"发送给朋友"
+                                                           icon:@"Action_Share"
+                                                        handler:^{
+                                                            [BCWXShareProvider shareWebPage:BCWX_SESSION withTitle:item.title text:item.descr image:image.image webUrl:SHARE_URL complete:^(BOOL suc, NSString *errMsg) {
+                                                                ;
+                                                            }];
+                                                            
+                                                        }];
+                
+                ZYShareItem *item1 = [ZYShareItem itemWithTitle:@"分享到朋友圈"
+                                                           icon:@"Action_Moments"
+                                                        handler:^{
+                                                            
+                                                            [BCWXShareProvider shareWebPage:WXSceneTimeline withTitle:item.title text:item.descr image:image.image webUrl:SHARE_URL complete:^(BOOL suc, NSString *errMsg) {
+                                                                ;
+                                                            }];
+                                                            
+                                                            
+                                                        }];
+                NSArray *shareItemsArray = @[item0, item1];
+                NSArray *functionItemsArray = nil;
+                
+                // 创建shareView
+                ZYShareView *shareView = [ZYShareView shareViewWithShareItems:shareItemsArray
+                                                                functionItems:functionItemsArray];
+                // 弹出shareView
+                [shareView show];
+                
+                return [RACSignal empty];
+            }];
+        }
+        
+        return cell;
+    }
+    else
+    {
+        static NSString *CellIdentifier = @"others_cell";
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        
+        /**
+        CourseDetailOthers *item = [self.model.info.others objectAtIndex:indexPath.row];
+        {
+            UIImageView *image = [cell viewWithTag:100];
+            [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.thumb] URLEncodedString]]];
+        }
+        {
+            UILabel *text = [cell viewWithTag:110];
+            text.text = item.title;
+        }
+        {
+            UILabel *text = [cell viewWithTag:120];
+            text.text = item.auth;
+        }
+         */
+        
+        return cell;
+    }
+    
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    /**
+    if (indexPath.section == 1) {
+        CourseDetailOthers *item = [self.model.info.others objectAtIndex:indexPath.row];
+        [Configuration Instance].current_course_id = item.othersIdentifier;
+        UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        
+        UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"CourseDetailViewController"];
+        
+        self.navigationController.navigationBarHidden = FALSE;
+        [self.navigationController pushViewController:vc animated:YES];
+    }
+     */
+}
+
+/*
+ // Override to support conditional editing of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+ // Return NO if you do not want the specified item to be editable.
+ return YES;
+ }
+ */
+
+/*
+ // Override to support editing the table view.
+ - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+ if (editingStyle == UITableViewCellEditingStyleDelete) {
+ // Delete the row from the data source
+ [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+ } else if (editingStyle == UITableViewCellEditingStyleInsert) {
+ // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+ }
+ }
+ */
+
+/*
+ // Override to support rearranging the table view.
+ - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
+ }
+ */
+
+/*
+ // Override to support conditional rearranging of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
+ // Return NO if you do not want the item to be re-orderable.
+ return YES;
+ }
+ */
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+
+- (void)playVideoWithURL:(NSURL *)url
+{
+    if (!self.videoController) {
+        CGFloat width = [UIScreen mainScreen].bounds.size.width;
+        self.videoController = [[KRVideoPlayerController alloc] initWithFrame:CGRectMake(0, 64, width, width*(9.0/16.0))];
+        __weak typeof(self)weakSelf = self;
+        [self.videoController setDimissCompleteBlock:^{
+            weakSelf.videoController = nil;
+        }];
+        [self.videoController showInWindow];
+        
+        [[self rac_signalForSelector:@selector(viewWillDisappear:)] subscribeNext:^(id x) {
+            [weakSelf.videoController stop];
+            [weakSelf.videoController dismiss];
+        }];
+    }
+    self.videoController.contentURL = url;
+}
+
+@end
+//
+//  WorksListViewController.m
+//  EDU
+//
+//  Created by renxingguo on 2016/10/12.
+//  Copyright © 2016年 MYXG. All rights reserved.
+//
+
+#import "WorksListViewController.h"
+#import "UICollectionView+Empty.h"
+#import "EDUWorksListDataModels.h"
+#import "UIImageView+WebCache.h"
+#import "UIScrollView+Scroll.h"
+#import "JSONHttpClient.h"
+#import "UIButton+Expand.h"
+
+@interface WorksListViewController ()
+
+
+@property (nonatomic,strong) EDUWorksListBaseClass* model;
+
+@end
+
+@implementation WorksListViewController
+
+
+static NSString * const reuseIdentifier = @"group_cell";
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    // Uncomment the following line to preserve selection between presentations
+    // self.clearsSelectionOnViewWillAppear = NO;
+    
+    // Do any additional setup after loading the view.
+    /**
+    self.collectionView.refreshCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        //
+        [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaWorksList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+            //
+            self.model = [[EDUWorksListBaseClass alloc] initWithDictionary:json];
+            [self.collectionView reloadData];
+        }];
+        return [RACSignal empty];
+    }];
+    */
+    
+    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/shaWorksList.json",BASEURL] params:nil completion:^(id json, JSONModelError *err) {
+        //
+        self.model = [[EDUWorksListBaseClass alloc] initWithDictionary:json];
+        [self.collectionView reloadData];
+    }];
+    
+    UIButton *moreButton = [self.view viewWithTag:100];
+    [moreButton setEnlargeEdge:10];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+#pragma mark <UICollectionViewDataSource>
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    
+    return 1;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return MIN(4,[self.model.info count]);
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
+    
+    EDUWorksListInfo *item = [self.model.info objectAtIndex:indexPath.row];
+    
+    {
+        UIImageView *image = [cell viewWithTag:100];
+        
+        [image sd_setImageWithURL:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.thumb] URLEncodedString]]];
+        
+        UITapGestureRecognizer *myTapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(imageViewClicked:)];
+        image.userInteractionEnabled = YES;
+        [image addGestureRecognizer:myTapGesture];
+    }
+    {
+        UILabel *text = [cell viewWithTag:110];
+        text.text = item.title;
+    }
+    {
+        UILabel *text = [cell viewWithTag:120];
+        text.text = item.descr;
+    }
+    
+    
+    [cell layoutIfNeeded];
+    return cell;
+}
+
+#pragma mark <UICollectionViewDelegate>
+
+/*
+ // Uncomment this method to specify if the specified item should be highlighted during tracking
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
+	return YES;
+ }
+ */
+
+/*
+ // Uncomment this method to specify if the specified item should be selected
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+ return YES;
+ }
+ */
+
+/*
+ // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
+ - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
+	return NO;
+ }
+ 
+ - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	return NO;
+ }
+ 
+ - (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	
+ }
+ */
+
+//- (CGSize)collectionViewContentSize
+//{
+//    float unit = [UIScreen mainScreen].bounds.size.width;
+//    return CGSizeMake(unit, unit);
+//}
+
+//定义每个UICollectionViewCell 的大小
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    //float unit = ([UIScreen mainScreen].bounds.size.width-4)/2;
+    float unit = 150;
+    
+    return CGSizeMake(unit, unit*25/30);
+}
+//每个section中不同的行之间的行间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 2;
+}
+//每个item之间的间距
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section
+{
+    return 0;
+}
+
+
+-(void)imageViewClicked:(UITapGestureRecognizer*)gestRecognizer
+{
+    
+     UIImageView* iv = (UIImageView*)gestRecognizer.view;
+     NSInteger tag = iv.tag; // then do what you want with this
+     
+     // or get the cell by going up thru the superviews until you find it
+     UIView* cellView = iv;
+     while(cellView && ![cellView isKindOfClass:[UICollectionViewCell class]])
+     cellView = cellView.superview; // go up until you find a cell
+     
+     // Then get its indexPath
+     UICollectionViewCell* cell = (UICollectionViewCell*)cellView;
+     NSIndexPath* indexPath = [self.collectionView indexPathForCell:cell];
+     EDUWorksListInfo *item = [self.model.info objectAtIndex:indexPath.row];
+     
+     [Configuration Instance].current_work_id = item.infoIdentifier;
+    [Configuration Instance].current_video_url_title = item.title;
+     
+     UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"firstpage" bundle:nil];
+     
+     UIViewController *vc = [mainStoryboard instantiateViewControllerWithIdentifier:@"WorksDetailTableViewController"];
+     
+     self.navigationController.navigationBarHidden = FALSE;
+     [self.navigationController pushViewController:vc animated:YES];
+}
+
+@end

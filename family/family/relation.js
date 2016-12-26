@@ -830,7 +830,7 @@ function selector2id(selector,sex){
                 for(var i in _filter){
                     var item = _filter[i];
                     selector = selector.replace(item['exp'],item['str']);
-                    console.log('filter#',item['exp'],selector);
+                    //console.log('filter#',item['exp'],selector);
                     if(selector.indexOf('#')>-1){
                         var arr = selector.split('#');
                         for(var i=0;i<arr.length;i++){
@@ -949,11 +949,11 @@ function relationship(parameter){
         options[p] = parameter[p];
     }
     var selectors = getSelectors(options.text);
-     console.log('selectors#',selectors);
+     //console.log('selectors#',selectors);
     var result = [];							//匹配结果
     for(var i = 0;i<selectors.length;i++){		//遍历所有可能性
         var ids = selector2id(selectors[i],options.sex);
-         console.log('ids#',ids);
+         //console.log('ids#',ids);
         for(var j=0;j<ids.length;j++){
             var id = ids[j];
             if(options.type=='chain'){

@@ -16,6 +16,7 @@
 		636154981E08D456003DA0D9 /* OCCallJSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 636154971E08D456003DA0D9 /* OCCallJSViewController.m */; };
 		6361549A1E08D540003DA0D9 /* relation.js in Resources */ = {isa = PBXBuildFile; fileRef = 636154991E08D540003DA0D9 /* relation.js */; };
 		6361549C1E08FDB3003DA0D9 /* test.js in Resources */ = {isa = PBXBuildFile; fileRef = 6361549B1E08FDB3003DA0D9 /* test.js */; };
+		636154AD1E0A197A003DA0D9 /* relationship.js in Resources */ = {isa = PBXBuildFile; fileRef = 636154AC1E0A197A003DA0D9 /* relationship.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		636154971E08D456003DA0D9 /* OCCallJSViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OCCallJSViewController.m; sourceTree = "<group>"; };
 		636154991E08D540003DA0D9 /* relation.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = relation.js; sourceTree = "<group>"; };
 		6361549B1E08FDB3003DA0D9 /* test.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = test.js; sourceTree = "<group>"; };
+		636154AC1E0A197A003DA0D9 /* relationship.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = relationship.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +74,7 @@
 				636154961E08D456003DA0D9 /* OCCallJSViewController.h */,
 				636154971E08D456003DA0D9 /* OCCallJSViewController.m */,
 				636154991E08D540003DA0D9 /* relation.js */,
+				636154AC1E0A197A003DA0D9 /* relationship.js */,
 				6361549B1E08FDB3003DA0D9 /* test.js */,
 				636154881E08D2FE003DA0D9 /* Main.storyboard */,
 				6361548B1E08D2FE003DA0D9 /* Assets.xcassets */,
@@ -152,6 +155,7 @@
 				6361549A1E08D540003DA0D9 /* relation.js in Resources */,
 				6361548F1E08D2FE003DA0D9 /* LaunchScreen.storyboard in Resources */,
 				6361548C1E08D2FE003DA0D9 /* Assets.xcassets in Resources */,
+				636154AD1E0A197A003DA0D9 /* relationship.js in Resources */,
 				6361548A1E08D2FE003DA0D9 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

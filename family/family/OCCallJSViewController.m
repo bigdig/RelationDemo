@@ -29,7 +29,7 @@
     // Do any additional setup after loading the view from its nib.
     self.title = @"oc call js";
     self.context = [[JSContext alloc] init];
-    [self.context evaluateScript:[self loadJsFile:@"relation"]];
+    [self.context evaluateScript:[self loadJsFile:@"relationship"]];
     
     
 }
@@ -48,11 +48,20 @@
 - (IBAction)sendToJS:(id)sender {
     //relationship({text:'爸爸的舅舅',sex:0,reverse:true}),['外甥孙女']);
     
-    JSValue *function = [self.context objectForKeyedSubscript:@"relationship"];
+    JSValue *function = [[self.context objectForKeyedSubscript:@"relationship"] objectForKeyedSubscript:@"relationship"];
     //@"爸爸的舅舅"
     
-    JSValue *result = [function callWithArguments:@[@{@"text":@"爸爸的舅舅",@"sex":[NSNumber numberWithInt:0]}]];
+    JSValue *result = [function callWithArguments:@[@{@"text":@"爸爸的爸爸",@"sex":[NSNumber numberWithInt:0]}]];
     self.showLable.text = [result toString];
+    
+    {
+        JSValue *function = [[self.context objectForKeyedSubscript:@"relationship"] objectForKeyedSubscript:@"getFilterRelative"];
+        //@"爸爸的舅舅"
+        
+        JSValue *result = [function callWithArguments:@[@"m"]];
+        NSDictionary * dic = [result toArray];
+        NSLog(@"%@", [result toString]);
+    }
 }
 
 /*
