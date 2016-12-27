@@ -51,7 +51,9 @@
     JSValue *function = [[self.context objectForKeyedSubscript:@"relationship"] objectForKeyedSubscript:@"relationship"];
     //@"爸爸的舅舅"
     
-    JSValue *result = [function callWithArguments:@[@{@"text":@"爸爸的爸爸",@"sex":[NSNumber numberWithInt:0]}]];
+    JSValue *result = [function callWithArguments:@[@{@"text":@"爸爸的爸爸",@"sex":[NSNumber numberWithInt:0],
+                                                      @"reverse":[NSNumber numberWithBool:true]
+                                                      }]];
     self.showLable.text = [result toString];
     
     {

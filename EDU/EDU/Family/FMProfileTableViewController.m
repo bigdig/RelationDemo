@@ -17,6 +17,7 @@
 #import "STPickerSingle.h"
 #import "STPickerDate.h"
 #import "UIButton+SetCropImage.h"
+#import "FMWtFaUserLoginModel.h"
 
 @interface FMProfileTableViewController ()<UITextFieldDelegate,UIPickerViewDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate,STPickerAreaDelegate, STPickerSingleDelegate, STPickerDateDelegate>
 
@@ -60,6 +61,13 @@
         
     }];
     
+    [RACObserve([Configuration Instance],wxopenid) subscribeNext:^(id x) {
+        if ([Configuration Instance].wxopenid && [[Configuration Instance].wxopenid length]) {
+            
+            [self getUserInfo:[Configuration Instance].wxopenid access_token:[Configuration Instance].wxaccess_token];
+        }
+    }];
+    
 
     self.profileViewModel = [[FMProfileViewModel alloc] init];
     [self bindModel];
@@ -68,9 +76,7 @@
         RACTupleUnpack(id success, NSString *info) = x;
         
         if ([success boolValue]) {
-            //show ralation
-            UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMRelationViewController"];
-            [self.navigationController pushViewController:ctl animated:YES];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"LOGIN_SUCCESS" object:nil];
         }
         else
         {
@@ -106,7 +112,7 @@
     self.phoneTextField.text = [Configuration Instance].phoneNumber;
     self.nameTextField.text = [Configuration Instance].userName;
     self.birthdayTextField.text = [Configuration Instance].birthday;
-    self.sexTextField.text = [Configuration Instance].sex;
+    self.sexTextField.text = [Configuration Instance].sex==0?@"女":@"男";
     
     self.phoneTextField.enabled = FALSE;
     RAC(self.profileViewModel, name) = self.nameTextField.rac_textSignal;
@@ -269,6 +275,41 @@
     
     [self.faceImageView setImage:image];
     self.profileViewModel.faceImage = image;
+}
+
+
+// 获取用户信息
+- (void)getUserInfo:(NSString*)openid access_token:(NSString*) access_token {
+    NSString *url = [NSString stringWithFormat:@"https://api.weixin.qq.com/sns/userinfo?access_token=%@&openid=%@", access_token, openid];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSURL *zoneUrl = [NSURL URLWithString:url];
+        NSString *zoneStr = [NSString stringWithContentsOfURL:zoneUrl encoding:NSUTF8StringEncoding error:nil];
+        NSData *data = [zoneStr dataUsingEncoding:NSUTF8StringEncoding];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (data) {
+                NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+                NSLog(@"openid = %@", [dic objectForKey:@"openid"]);
+                NSLog(@"nickname = %@", [dic objectForKey:@"nickname"]);
+                NSLog(@"sex = %@", [dic objectForKey:@"sex"]);
+                NSLog(@"country = %@", [dic objectForKey:@"country"]);
+                NSLog(@"province = %@", [dic objectForKey:@"province"]);
+                NSLog(@"city = %@", [dic objectForKey:@"city"]);
+                NSLog(@"headimgurl = %@", [dic objectForKey:@"headimgurl"]);
+                NSLog(@"unionid = %@", [dic objectForKey:@"unionid"]);
+                NSLog(@"privilege = %@", [dic objectForKey:@"privilege"]);
+                
+                [self.faceImageView sd_setImageWithURL:[NSURL URLWithString:[dic objectForKey:@"headimgurl"]]];
+                self.nameTextField.text = [dic objectForKey:@"nickname"];
+                self.sexTextField.text = [[dic objectForKey:@"sex"] integerValue]==0?@"女":@"男";
+                
+                [self.nameTextField sendActionsForControlEvents:(UIControlEventAllEvents)];
+                [self.sexTextField sendActionsForControlEvents:(UIControlEventAllEvents)];
+                self.profileViewModel.faceImage = self.faceImageView.image;
+                
+            }
+        });
+    });
 }
 
 @end

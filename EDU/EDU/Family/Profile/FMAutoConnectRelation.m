@@ -111,7 +111,7 @@
                                     
                                     NSString *relation = [NSString stringWithFormat:@"%@的%@", objA.relationWithMe, objB.relationWithMe];
                                     JSValue *result = [function callWithArguments:@[@{@"text":relation,@"sex":[NSNumber numberWithInt:[[Configuration Instance].sex integerValue]]}]];
-                                    NSString *r = [result toString];
+                                    NSString *r = [[result toArray] objectAtIndex:0];
                                     NSLog(@"%@",r);
                                     if([r length])
                                     {

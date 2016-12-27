@@ -1,6 +1,6 @@
 platform :ios,'8.0'
 
-target 'EDU' do
+target 'Family' do
     pod 'ReactiveCocoa'
     pod 'CYLTabBarController'
     pod 'SDWebImage'
@@ -16,6 +16,7 @@ target 'EDU' do
     pod 'YYText'
     pod 'WEPopover'
     pod 'UMengUShare/Social/QQ'
+    pod 'Weixin'
     use_frameworks!
 end
 

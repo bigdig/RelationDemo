@@ -36,6 +36,8 @@
 #define COLOR_LITLE_GREE [UIColor colorWithRed:149/255.0 green:198/255.0 blue:45/255.0 alpha:1.0]
 #define COLOR_LITLE_BLUE [UIColor colorWithRed:28/255.0 green:173/255.0 blue:209/255.0 alpha:1.0]
 
+#define COLOR_FAMILY_GREEN [UIColor colorWithRed:25/255.0 green:201/255.0 blue:96/255.0 alpha:1.0]
+
 //精品馆id
 #define BOUTIQUE_ID 3
 

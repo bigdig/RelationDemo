@@ -17,6 +17,7 @@
 #import "UIButton+SetCropImage.h"
 
 #import "FMAutoConnectRelation.h"
+#import "FMMessageViewController.h"
 
 @interface FMRelationViewController ()<UITableViewDataSource,UITableViewDelegate>
 
@@ -76,6 +77,19 @@
         return [RACSignal empty];
     }];
     
+    [[self rac_signalForSelector:@selector(tableView:didSelectRowAtIndexPath:)] subscribeNext:^(RACTuple *x) {
+        NSIndexPath *indexPath = x.second;
+        FMRelationListRelation *item = [self.model.info.relation objectAtIndex:indexPath.row];
+        if (item.faUser == nil|| item.faUser.faUserIdentifier<0.01) {
+            
+            FMMessageViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMMessageViewController"];
+            ctl.phone = item.mobile;
+            ctl.callName = item.relationWithMe;
+            ctl.name = item.name;
+            [self.navigationController pushViewController:ctl animated:YES];
+        }
+        
+    }];
     
 }
 
@@ -129,6 +143,16 @@
     {
         UILabel *text = [cell viewWithTag:130];
         text.text = item.mobile;
+    }
+    {
+        UILabel *text = [cell viewWithTag:140];
+        if (item.faUser == nil || item.faUser.faUserIdentifier<0.01) {
+            text.text = @"邀请补充";
+        }
+        else
+        {
+            text.text = @"";
+        }
     }
     
     return cell;

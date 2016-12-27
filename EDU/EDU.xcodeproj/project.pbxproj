@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2F69533D4F8437757793F1F7 /* Pods_Family.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A39698B1C638545C399AA1E1 /* Pods_Family.framework */; };
 		631B6EAA1DE5A2E200E3E64D /* UITextField+PaddingText.m in Sources */ = {isa = PBXBuildFile; fileRef = 631B6EA91DE5A2E200E3E64D /* UITextField+PaddingText.m */; };
 		631B6EB01DE67C3300E3E64D /* RegisterViewControllerV2_1.m in Sources */ = {isa = PBXBuildFile; fileRef = 631B6EAF1DE67C3300E3E64D /* RegisterViewControllerV2_1.m */; };
 		631B6EB31DE681E000E3E64D /* RegisterViewControllerV2_2.m in Sources */ = {isa = PBXBuildFile; fileRef = 631B6EB21DE681E000E3E64D /* RegisterViewControllerV2_2.m */; };
@@ -213,6 +214,18 @@
 		636155031E0BC4EF003DA0D9 /* FMRelationListFaUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 636155001E0BC4EF003DA0D9 /* FMRelationListFaUser.m */; };
 		636155041E0BC4EF003DA0D9 /* FMRelationListMyFamily.m in Sources */ = {isa = PBXBuildFile; fileRef = 636155021E0BC4EF003DA0D9 /* FMRelationListMyFamily.m */; };
 		636155071E0BC6BB003DA0D9 /* FMAutoConnectRelation.m in Sources */ = {isa = PBXBuildFile; fileRef = 636155051E0BC6BB003DA0D9 /* FMAutoConnectRelation.m */; };
+		636155091E10AE8E003DA0D9 /* Family.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 636155081E10AE8E003DA0D9 /* Family.xcassets */; };
+		6361550F1E10C589003DA0D9 /* FMMatchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6361550E1E10C589003DA0D9 /* FMMatchViewController.m */; };
+		636155121E10E044003DA0D9 /* FMMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 636155111E10E044003DA0D9 /* FMMessageViewController.m */; };
+		636155151E110DD0003DA0D9 /* JSCaller.m in Sources */ = {isa = PBXBuildFile; fileRef = 636155141E110DCF003DA0D9 /* JSCaller.m */; };
+		636155201E112545003DA0D9 /* FMUserEntityBaseClass.m in Sources */ = {isa = PBXBuildFile; fileRef = 636155181E112545003DA0D9 /* FMUserEntityBaseClass.m */; };
+		636155211E112545003DA0D9 /* FMUserEntityEntityUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 6361551B1E112545003DA0D9 /* FMUserEntityEntityUser.m */; };
+		636155221E112545003DA0D9 /* FMUserEntityFaUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 6361551D1E112545003DA0D9 /* FMUserEntityFaUser.m */; };
+		636155231E112545003DA0D9 /* FMUserEntityInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 6361551F1E112545003DA0D9 /* FMUserEntityInfo.m */; };
+		6361B5171E120E8F00FD063F /* NSString+AttributeString.m in Sources */ = {isa = PBXBuildFile; fileRef = 6361B5161E120E8F00FD063F /* NSString+AttributeString.m */; };
+		6361B51A1E12391300FD063F /* AppDelegate+WeChatLogin.m in Sources */ = {isa = PBXBuildFile; fileRef = 6361B5181E12391300FD063F /* AppDelegate+WeChatLogin.m */; };
+		6361B51D1E123BA200FD063F /* FMWtFaUserLoginModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 6361B51C1E123BA200FD063F /* FMWtFaUserLoginModel.m */; };
+		6361B5201E12447F00FD063F /* WXLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6361B51F1E12447F00FD063F /* WXLoginViewController.m */; };
 		6362C8081DACE7C60049500E /* firstpage.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6362C8071DACE7C60049500E /* firstpage.storyboard */; };
 		639148E51D936B2D00D69A56 /* MyAccountViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 639148E41D936B2D00D69A56 /* MyAccountViewController.m */; };
 		639148EB1D93AD9800D69A56 /* FavoriteTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 639148EA1D93AD9800D69A56 /* FavoriteTableViewController.m */; };
@@ -309,10 +322,10 @@
 		63FF07C21DAF37AD001993F1 /* EDUSearchResultInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 63FF07BC1DAF37AD001993F1 /* EDUSearchResultInfo.m */; };
 		63FF07C31DAF37AD001993F1 /* EDUSearchResultList.m in Sources */ = {isa = PBXBuildFile; fileRef = 63FF07BE1DAF37AD001993F1 /* EDUSearchResultList.m */; };
 		63FF07C41DAF37AD001993F1 /* EDUSearchResultShaArticlesCls.m in Sources */ = {isa = PBXBuildFile; fileRef = 63FF07C01DAF37AD001993F1 /* EDUSearchResultShaArticlesCls.m */; };
-		7C0D67625C44BCAF49FF8BAB /* Pods_EDU.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F4C116C918FC2937F6746216 /* Pods_EDU.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0C1798161D02EB29D7933AFE /* Pods-Family.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Family.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Family/Pods-Family.debug.xcconfig"; sourceTree = "<group>"; };
 		5E48A86113A9FB0B807CEDE9 /* Pods-EDU.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EDU.release.xcconfig"; path = "Pods/Target Support Files/Pods-EDU/Pods-EDU.release.xcconfig"; sourceTree = "<group>"; };
 		631B6EA81DE5A2E200E3E64D /* UITextField+PaddingText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UITextField+PaddingText.h"; sourceTree = "<group>"; };
 		631B6EA91DE5A2E200E3E64D /* UITextField+PaddingText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UITextField+PaddingText.m"; sourceTree = "<group>"; };
@@ -707,6 +720,30 @@
 		636155021E0BC4EF003DA0D9 /* FMRelationListMyFamily.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMRelationListMyFamily.m; sourceTree = "<group>"; };
 		636155051E0BC6BB003DA0D9 /* FMAutoConnectRelation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMAutoConnectRelation.m; sourceTree = "<group>"; };
 		636155061E0BC6BB003DA0D9 /* FMAutoConnectRelation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMAutoConnectRelation.h; sourceTree = "<group>"; };
+		636155081E10AE8E003DA0D9 /* Family.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Family.xcassets; sourceTree = "<group>"; };
+		6361550D1E10C589003DA0D9 /* FMMatchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMMatchViewController.h; sourceTree = "<group>"; };
+		6361550E1E10C589003DA0D9 /* FMMatchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMMatchViewController.m; sourceTree = "<group>"; };
+		636155101E10E044003DA0D9 /* FMMessageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMMessageViewController.h; sourceTree = "<group>"; };
+		636155111E10E044003DA0D9 /* FMMessageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMMessageViewController.m; sourceTree = "<group>"; };
+		636155131E110DCF003DA0D9 /* JSCaller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSCaller.h; sourceTree = "<group>"; };
+		636155141E110DCF003DA0D9 /* JSCaller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSCaller.m; sourceTree = "<group>"; };
+		636155171E112545003DA0D9 /* FMUserEntityBaseClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMUserEntityBaseClass.h; sourceTree = "<group>"; };
+		636155181E112545003DA0D9 /* FMUserEntityBaseClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMUserEntityBaseClass.m; sourceTree = "<group>"; };
+		636155191E112545003DA0D9 /* FMuserEntityDataModels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMuserEntityDataModels.h; sourceTree = "<group>"; };
+		6361551A1E112545003DA0D9 /* FMUserEntityEntityUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMUserEntityEntityUser.h; sourceTree = "<group>"; };
+		6361551B1E112545003DA0D9 /* FMUserEntityEntityUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMUserEntityEntityUser.m; sourceTree = "<group>"; };
+		6361551C1E112545003DA0D9 /* FMUserEntityFaUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMUserEntityFaUser.h; sourceTree = "<group>"; };
+		6361551D1E112545003DA0D9 /* FMUserEntityFaUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMUserEntityFaUser.m; sourceTree = "<group>"; };
+		6361551E1E112545003DA0D9 /* FMUserEntityInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMUserEntityInfo.h; sourceTree = "<group>"; };
+		6361551F1E112545003DA0D9 /* FMUserEntityInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMUserEntityInfo.m; sourceTree = "<group>"; };
+		6361B5151E120E8F00FD063F /* NSString+AttributeString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+AttributeString.h"; sourceTree = "<group>"; };
+		6361B5161E120E8F00FD063F /* NSString+AttributeString.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+AttributeString.m"; sourceTree = "<group>"; };
+		6361B5181E12391300FD063F /* AppDelegate+WeChatLogin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AppDelegate+WeChatLogin.m"; sourceTree = "<group>"; };
+		6361B5191E12391300FD063F /* AppDelegate+WeChatLogin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AppDelegate+WeChatLogin.h"; sourceTree = "<group>"; };
+		6361B51B1E123BA200FD063F /* FMWtFaUserLoginModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMWtFaUserLoginModel.h; sourceTree = "<group>"; };
+		6361B51C1E123BA200FD063F /* FMWtFaUserLoginModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMWtFaUserLoginModel.m; sourceTree = "<group>"; };
+		6361B51E1E12447F00FD063F /* WXLoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WXLoginViewController.h; sourceTree = "<group>"; };
+		6361B51F1E12447F00FD063F /* WXLoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WXLoginViewController.m; sourceTree = "<group>"; };
 		6362C8071DACE7C60049500E /* firstpage.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = firstpage.storyboard; sourceTree = "<group>"; };
 		639148E31D936B2D00D69A56 /* MyAccountViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyAccountViewController.h; sourceTree = "<group>"; };
 		639148E41D936B2D00D69A56 /* MyAccountViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyAccountViewController.m; sourceTree = "<group>"; };
@@ -898,7 +935,8 @@
 		63FF630C1DB6177200003814 /* EDU.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EDU.entitlements; sourceTree = "<group>"; };
 		8E6958198B18964FE942E4AC /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		97083A695E0101ECFD0D5432 /* Pods-EDU.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-EDU.debug.xcconfig"; path = "Pods/Target Support Files/Pods-EDU/Pods-EDU.debug.xcconfig"; sourceTree = "<group>"; };
-		F4C116C918FC2937F6746216 /* Pods_EDU.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_EDU.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B45E95400903D36C5D474D4 /* Pods-Family.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Family.release.xcconfig"; path = "Pods/Target Support Files/Pods-Family/Pods-Family.release.xcconfig"; sourceTree = "<group>"; };
+		A39698B1C638545C399AA1E1 /* Pods_Family.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Family.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -908,7 +946,7 @@
 			files = (
 				633408F11DCB285900CFA7CD /* UMMobClick.framework in Frameworks */,
 				635066CB1D7833CB00B841C6 /* WebKit.framework in Frameworks */,
-				7C0D67625C44BCAF49FF8BAB /* Pods_EDU.framework in Frameworks */,
+				2F69533D4F8437757793F1F7 /* Pods_Family.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -920,6 +958,8 @@
 			children = (
 				97083A695E0101ECFD0D5432 /* Pods-EDU.debug.xcconfig */,
 				5E48A86113A9FB0B807CEDE9 /* Pods-EDU.release.xcconfig */,
+				0C1798161D02EB29D7933AFE /* Pods-Family.debug.xcconfig */,
+				9B45E95400903D36C5D474D4 /* Pods-Family.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -1189,6 +1229,7 @@
 				6391492B1D950A0000D69A56 /* Macro.h */,
 				6350670E1D79853B00B841C6 /* Main.storyboard */,
 				635066091D742E6B00B841C6 /* Assets.xcassets */,
+				636155081E10AE8E003DA0D9 /* Family.xcassets */,
 				6350660E1D742E6B00B841C6 /* Info.plist */,
 				63D00F3B1DB5FA5300F7AACA /* Launch Screen.storyboard */,
 				6327E3241DC1E7680085D881 /* Other.storyboard */,
@@ -1672,6 +1713,20 @@
 				636154E61E0B6BA9003DA0D9 /* FMAddRelationTableViewController.m */,
 				636154EB1E0B7B3F003DA0D9 /* FMCodeTableViewController.h */,
 				636154EC1E0B7B3F003DA0D9 /* FMCodeTableViewController.m */,
+				6361550D1E10C589003DA0D9 /* FMMatchViewController.h */,
+				6361550E1E10C589003DA0D9 /* FMMatchViewController.m */,
+				636155101E10E044003DA0D9 /* FMMessageViewController.h */,
+				636155111E10E044003DA0D9 /* FMMessageViewController.m */,
+				636155131E110DCF003DA0D9 /* JSCaller.h */,
+				636155141E110DCF003DA0D9 /* JSCaller.m */,
+				6361B5151E120E8F00FD063F /* NSString+AttributeString.h */,
+				6361B5161E120E8F00FD063F /* NSString+AttributeString.m */,
+				6361B5181E12391300FD063F /* AppDelegate+WeChatLogin.m */,
+				6361B5191E12391300FD063F /* AppDelegate+WeChatLogin.h */,
+				6361B51B1E123BA200FD063F /* FMWtFaUserLoginModel.h */,
+				6361B51C1E123BA200FD063F /* FMWtFaUserLoginModel.m */,
+				6361B51E1E12447F00FD063F /* WXLoginViewController.h */,
+				6361B51F1E12447F00FD063F /* WXLoginViewController.m */,
 			);
 			path = Family;
 			sourceTree = "<group>";
@@ -1757,6 +1812,7 @@
 		636154F01E0BAE56003DA0D9 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				636155161E112545003DA0D9 /* FMUserEntity */,
 				636154F11E0BAE56003DA0D9 /* FMRelationList */,
 			);
 			path = Model;
@@ -1778,6 +1834,22 @@
 				636154F81E0BAE56003DA0D9 /* FMRelationListRelation.m */,
 			);
 			path = FMRelationList;
+			sourceTree = "<group>";
+		};
+		636155161E112545003DA0D9 /* FMUserEntity */ = {
+			isa = PBXGroup;
+			children = (
+				636155171E112545003DA0D9 /* FMUserEntityBaseClass.h */,
+				636155181E112545003DA0D9 /* FMUserEntityBaseClass.m */,
+				636155191E112545003DA0D9 /* FMuserEntityDataModels.h */,
+				6361551A1E112545003DA0D9 /* FMUserEntityEntityUser.h */,
+				6361551B1E112545003DA0D9 /* FMUserEntityEntityUser.m */,
+				6361551C1E112545003DA0D9 /* FMUserEntityFaUser.h */,
+				6361551D1E112545003DA0D9 /* FMUserEntityFaUser.m */,
+				6361551E1E112545003DA0D9 /* FMUserEntityInfo.h */,
+				6361551F1E112545003DA0D9 /* FMUserEntityInfo.m */,
+			);
+			path = FMUserEntity;
 			sourceTree = "<group>";
 		};
 		6362C8011DACD87C0049500E /* UIV2 */ = {
@@ -2206,7 +2278,7 @@
 			children = (
 				635066CA1D7833CB00B841C6 /* WebKit.framework */,
 				8E6958198B18964FE942E4AC /* Pods.framework */,
-				F4C116C918FC2937F6746216 /* Pods_EDU.framework */,
+				A39698B1C638545C399AA1E1 /* Pods_Family.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2278,6 +2350,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				636155091E10AE8E003DA0D9 /* Family.xcassets in Resources */,
 				6350672A1D7D3DBC00B841C6 /* V2LoginStoryboard.storyboard in Resources */,
 				6327E3251DC1E7690085D881 /* Other.storyboard in Resources */,
 				63D00F371DB4C61900F7AACA /* 6401.jpg in Resources */,
@@ -2350,7 +2423,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-EDU/Pods-EDU-frameworks.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Family/Pods-Family-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		BD8452DAA6DC6867A8AE4E8C /* [CP] Copy Pods Resources */ = {
@@ -2365,7 +2438,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-EDU/Pods-EDU-resources.sh\"\n";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Family/Pods-Family-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		EF38A8E322005B010E8E7DA0 /* [CP] Check Pods Manifest.lock */ = {
@@ -2444,6 +2517,7 @@
 				634AFA5D1DED1A8F00576075 /* PopoverViewController1.m in Sources */,
 				639148EB1D93AD9800D69A56 /* FavoriteTableViewController.m in Sources */,
 				636154A71E092F87003DA0D9 /* FMRegisterViewController.m in Sources */,
+				636155151E110DD0003DA0D9 /* JSCaller.m in Sources */,
 				6327E34D1DC2F4D30085D881 /* EDUCourseTaskResAuth.m in Sources */,
 				63FF07981DAE32AD001993F1 /* EDUWorksGetInfo.m in Sources */,
 				63CCBD551D9A671800E86D03 /* BCWXSocialHandler.m in Sources */,
@@ -2452,11 +2526,13 @@
 				635066C91D782B4500B841C6 /* QQPlayViewController.m in Sources */,
 				6350662D1D76D4B800B841C6 /* MCContentCollectionView.m in Sources */,
 				63D00F021DB08F6100F7AACA /* EDUGroupCourseListBaseClass.m in Sources */,
+				6361B51D1E123BA200FD063F /* FMWtFaUserLoginModel.m in Sources */,
 				6350662E1D76D4B800B841C6 /* MCStopView.m in Sources */,
 				6350672D1D7D408300B841C6 /* UIViewController+Login.m in Sources */,
 				636155071E0BC6BB003DA0D9 /* FMAutoConnectRelation.m in Sources */,
 				63FF07771DADE1EA001993F1 /* NSTimer+Addition.m in Sources */,
 				634AFAB21DF149A300576075 /* MyFrameLayout.m in Sources */,
+				636155231E112545003DA0D9 /* FMUserEntityInfo.m in Sources */,
 				635067261D7D3DBC00B841C6 /* LoginViewController.m in Sources */,
 				635066AE1D77FFAD00B841C6 /* CourseDetailTableViewController.m in Sources */,
 				635067021D79566300B841C6 /* EDURepositistList.m in Sources */,
@@ -2483,6 +2559,7 @@
 				63FF077A1DAE0DA2001993F1 /* WonderfulArticlesViewController.m in Sources */,
 				6356977F1DF56FB700B9725F /* EDUTagListInfo.m in Sources */,
 				63FF076F1DADDFF1001993F1 /* EDUAdBaseClass.m in Sources */,
+				6361550F1E10C589003DA0D9 /* FMMatchViewController.m in Sources */,
 				639148FD1D93AEB500D69A56 /* EDUUserFavouriteResCourse.m in Sources */,
 				6327E3391DC1F67D0085D881 /* EDUCourseCommentResAuth.m in Sources */,
 				63FF07B41DAF2D1E001993F1 /* SearchTableViewCell.m in Sources */,
@@ -2492,6 +2569,7 @@
 				635067041D79566300B841C6 /* EDURepositistResRepCls.m in Sources */,
 				635697811DF56FB700B9725F /* EDUTagListInternalBaseClass2.m in Sources */,
 				6356979A1DF69BF500B9725F /* EditPasswordViewControllerV2.m in Sources */,
+				6361B5171E120E8F00FD063F /* NSString+AttributeString.m in Sources */,
 				63FF079F1DAF2D0D001993F1 /* MYIntroductionView.m in Sources */,
 				635067291D7D3DBC00B841C6 /* ResigeViewController.m in Sources */,
 				63FF07C31DAF37AD001993F1 /* EDUSearchResultList.m in Sources */,
@@ -2584,9 +2662,12 @@
 				63D00F031DB08F6100F7AACA /* EDUGroupCourseListCourseList.m in Sources */,
 				63A061B11DD3278E000E390F /* EDUBaiduSchoolResults.m in Sources */,
 				6327E3691DC330230085D881 /* EDUHistoryListSacUser.m in Sources */,
+				636155121E10E044003DA0D9 /* FMMessageViewController.m in Sources */,
+				6361B51A1E12391300FD063F /* AppDelegate+WeChatLogin.m in Sources */,
 				634AFAB11DF149A300576075 /* MyFlowLayout.m in Sources */,
 				635066971D77CD9100B841C6 /* EDUCourseListResAuth.m in Sources */,
 				636154E31E0A7B46003DA0D9 /* STPickerView.m in Sources */,
+				636155221E112545003DA0D9 /* FMUserEntityFaUser.m in Sources */,
 				6327E3681DC330230085D881 /* EDUHistoryListSacRole.m in Sources */,
 				63CCBD561D9A671800E86D03 /* BCWXTimelineActivity.m in Sources */,
 				634AFAC01DF16E2400576075 /* RelatedVideoTableViewController.m in Sources */,
@@ -2594,6 +2675,7 @@
 				635066581D77CAED00B841C6 /* BloomFilter.m in Sources */,
 				63FF07851DAE1F87001993F1 /* WorksListViewController.m in Sources */,
 				6350662B1D76D4B800B841C6 /* HMSegmentedControl.m in Sources */,
+				636155211E112545003DA0D9 /* FMUserEntityEntityUser.m in Sources */,
 				631B6EC01DE8323D00E3E64D /* FirstPageGroupCourseViewController.m in Sources */,
 				633409021DCB2C7F00CFA7CD /* ZYShareView.m in Sources */,
 				63FF07971DAE32AD001993F1 /* EDUWorksGetBaseClass.m in Sources */,
@@ -2602,7 +2684,9 @@
 				635067681D86AAC500B841C6 /* UIButton+Badge.m in Sources */,
 				634AFAAF1DF149A300576075 /* MyDimeScale.m in Sources */,
 				635697731DF5663B00B9725F /* Readme.md in Sources */,
+				6361B5201E12447F00FD063F /* WXLoginViewController.m in Sources */,
 				635066C41D782AE900B841C6 /* WebViewJavascriptBridge_JS.m in Sources */,
+				636155201E112545003DA0D9 /* FMUserEntityBaseClass.m in Sources */,
 				636155031E0BC4EF003DA0D9 /* FMRelationListFaUser.m in Sources */,
 				634AFAB51DF149A300576075 /* MyLayoutSizeClass.m in Sources */,
 				634AFAC61DF520BC00576075 /* CourseTaskTableViewController.m in Sources */,
@@ -2741,7 +2825,7 @@
 		};
 		635066121D742E6B00B841C6 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 97083A695E0101ECFD0D5432 /* Pods-EDU.debug.xcconfig */;
+			baseConfigurationReference = 0C1798161D02EB29D7933AFE /* Pods-Family.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2779,7 +2863,7 @@
 		};
 		635066131D742E6B00B841C6 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5E48A86113A9FB0B807CEDE9 /* Pods-EDU.release.xcconfig */;
+			baseConfigurationReference = 9B45E95400903D36C5D474D4 /* Pods-Family.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;

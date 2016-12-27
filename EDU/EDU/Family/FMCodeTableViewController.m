@@ -11,7 +11,7 @@
 #import "ReactiveCocoa.h"
 #import "UITableView+RereshHead.h"
 #import "JSONHTTPClient.h"
-#import <JavaScriptCore/JavaScriptCore.h>
+#import "JSCaller.h"
 
 @interface FMCodeTableViewController ()
 
@@ -41,25 +41,15 @@
 @implementation FMCodeTableViewController
 
 
-- (NSString *)loadJsFile:(NSString*)fileName
-{
-    NSString *path = [[NSBundle mainBundle] pathForResource:fileName ofType:@"js"];
-    NSString *jsScript = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-    return jsScript;
-}
-
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     self.title = @"分类";
     
-    self.context = [[JSContext alloc] init];
-    [self.context evaluateScript:[self loadJsFile:@"relationship"]];
-    JSValue *function = [[self.context objectForKeyedSubscript:@"relationship"] objectForKeyedSubscript:@"getFilterRelative"];
+    JSValue *function = [JSCaller ShareInstance].getFilterRelativeFunction;
 
     self.tagDictionary = @{
-                           @"常用":@[@"父亲",@"母亲",@"哥哥'",@"弟弟",@"姐姐",@"妹妹",@"女儿",@"儿子"],
+                           @"常用":@[@"父亲",@"母亲",@"哥哥",@"弟弟",@"姐姐",@"妹妹",@"女儿",@"儿子"],
                            @"本家":[[function callWithArguments:@[@"f"]] toArray],
                            @"外家":[[function callWithArguments:@[@"m"]] toArray],
                            @"婆家":[[function callWithArguments:@[@"h"]] toArray],
@@ -108,7 +98,8 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return [self.tagSectionArray count];
+    //return [self.tagSectionArray count];
+    return 1;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {

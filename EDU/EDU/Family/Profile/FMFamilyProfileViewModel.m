@@ -10,6 +10,7 @@
 #import "NSString+MD5.h"
 #import "JSONHTTPClient.h"
 #import "BloomFilter.h"
+#import "JSCaller.h"
 
 @interface WtFaRelationAddModel : JSONModel
 
@@ -23,7 +24,7 @@
 
 - (BOOL)isSuccess
 {
-    return self.code == 0;
+    return self.code == 1;
 }
 
 +(JSONKeyMapper*)keyMapper
@@ -63,6 +64,26 @@
         return @([s1 length]>0&& [s2 length]>0);
     }];
     
+    [RACObserve(self, named) subscribeNext:^(id x) {
+        //计算反向称呼
+        @strongify(self);
+        if ([self.named length]) {
+            NSLog(@"%@",self.named)
+            JSValue *result = [[JSCaller ShareInstance].relationFunction callWithArguments:@[@{@"text":self.named,
+                                                                                               @"sex":[NSNumber numberWithInt:[[Configuration Instance].sex integerValue]],
+                                                                                               @"reverse":[NSNumber numberWithBool:true]
+                                                                                               
+                                                                                               }]];
+            NSString *r = [result toString];
+            NSLog(@"%@",r);
+            if([r length])
+            {
+                self.reverseNamed = r;
+            }
+        }
+
+    }];
+    
     // 处理登录业务逻辑
     _saveProfileCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
         
@@ -82,6 +103,51 @@
                     
                     
                     [self requestPostUrlWithImage:@"wtFaRelationAdd.json" parameters:para image:self.faceImage success:^(NSDictionary *responce) {
+                        
+                        //check err, process json ...
+                        WtFaRelationAddModel *model = [[WtFaRelationAddModel alloc] initWithDictionary:responce error:nil];
+                        
+                        if (!model.isSuccess)
+                        {
+                            [subscriber sendNext:RACTuplePack(@(NO),model.message)];
+                        }
+                        else
+                        {
+                            /**
+                            if([self.reverseNamed length])
+                            {
+                                [self.reverseRelationCommand execute:nil];
+                            }
+                             */
+                            [subscriber sendNext:RACTuplePack(@(YES),model.message)];
+                            
+                        }
+                        [subscriber sendCompleted];
+                        
+                        
+                    } failure:^(NSError *error) {
+                        ;
+                    }];
+                    
+                    return nil;
+                }];
+    }];
+    
+    _reverseRelationCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
+        
+        return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber)
+                {
+                    
+                    @strongify(self);
+                    
+                    NSMutableDictionary* para= [[NSMutableDictionary alloc] initWithDictionary: @{@"user_id":[Configuration Instance].userID,
+                                                                                                  @"re_mobile":self.mobile,
+                                                                                                  @"re_code":self.code,
+                                                                                                  @"re_named":self.reverseNamed
+                                                                                                  }];
+                    
+                    
+                    [self requestPostUrlWithImage:@"wtFaRelationRevers.json" parameters:para image:self.faceImage success:^(NSDictionary *responce) {
                         
                         //check err, process json ...
                         WtFaRelationAddModel *model = [[WtFaRelationAddModel alloc] initWithDictionary:responce error:nil];

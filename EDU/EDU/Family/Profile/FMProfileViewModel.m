@@ -68,11 +68,17 @@
         return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber)
                 {
                     
-                    NSMutableDictionary* para= [[NSMutableDictionary alloc] initWithDictionary: @{@"user_id":[Configuration Instance].userID,
-                                                                                                  @"name":self.name,
-                                                                                                  @"sex":[self.sex compare:@"男"]== NSOrderedSame ? @"1":@"0",
-                                                                                                  @"birthday": self.birthday
+                    NSMutableDictionary* para= [[NSMutableDictionary alloc] initWithDictionary: @{@"user_id":[Configuration Instance].userID
                                                                                                   }];
+                    if (self.birthday) {
+                        [para setObject:self.birthday forKey:@"birthday"];
+                    }
+                    if (self.name) {
+                        [para setObject:self.name forKey:@"name"];
+                    }
+                    if (self.sex) {
+                        [para setObject:[self.sex compare:@"男"]== NSOrderedSame ? @"1":@"0" forKey:@"sex"];
+                    }
                     
                     UIImage *image = self.faceImage;
                     

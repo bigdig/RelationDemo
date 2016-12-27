@@ -16,6 +16,8 @@
 #import "STPickerArea.h"
 #import "STPickerSingle.h"
 #import "STPickerDate.h"
+#import "NSString+Mobile.h"
+#import "FMuserEntityDataModels.h"
 
 @interface FMAddRelationTableViewController ()<UITextFieldDelegate,UIPickerViewDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate,STPickerAreaDelegate, STPickerSingleDelegate, STPickerDateDelegate>
 
@@ -122,6 +124,32 @@
         @strongify(self);
         [self.profileViewModel.saveProfileCommand execute:nil];
         return [RACSignal empty];
+    }];
+    
+    [self.phoneTextField.rac_textSignal subscribeNext:^(id x) {
+        //
+        if ([NSString isMobileNumber:self.phoneTextField.text]) {
+            //complete it
+            NSDictionary* para= @{@"mobile": self.phoneTextField.text
+                                  };
+            
+            [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/faEntityUserGet.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
+                //
+                FMUserEntityBaseClass *model = [FMUserEntityBaseClass modelObjectWithDictionary:json];
+                self.nameTextField.text = model.info.entityUser.faUser.name;
+                self.birthdayTextField.text = model.info.entityUser.birthdayShow;
+                self.sexTextField.text = model.info.entityUser.faUser.sex==0?@"女":@"男";
+                
+                NSString *urlstr = [[NSString stringWithFormat:@"%@%@",Prefix, model.info.entityUser.pic] URLEncodedStringFix];
+                [self.faceImageView sd_setImageWithURL:[NSURL URLWithString:urlstr]];
+                
+                [self.nameTextField sendActionsForControlEvents:UIControlEventAllEvents];
+                [self.birthdayTextField sendActionsForControlEvents:UIControlEventAllEvents];
+                [self.sexTextField sendActionsForControlEvents:UIControlEventAllEvents];
+                self.profileViewModel.faceImage = self.faceImageView.image;
+            }];
+
+        }
     }];
     
 }

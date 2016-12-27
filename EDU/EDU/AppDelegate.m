@@ -12,14 +12,11 @@
 #import "NewFeatureViewController.h"
 #import "BCWXSocialHandler.h"
 
-#import "FirstPageViewControllerV2.h"
-#import "RootTabBarViewController.h"
-
-#define VERSION 2
-
 #import <UMMobClick/MobClick.h>
 #import <UMSocialCore/UMSocialCore.h>
 #import <TencentOpenAPI/TencentOAuth.h>
+#import <WXApi.h>
+#import "AppDelegate+WeChatLogin.h"
 
 @interface AppDelegate ()
 
@@ -34,18 +31,8 @@
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     
-    //self.window.rootViewController = [[NewFeatureViewController alloc] init];
-    /**
-    FirstPageViewControllerV2 * ctl = [[UIStoryboard storyboardWithName:@"firstpage" bundle:nil] instantiateViewControllerWithIdentifier:@"FirstPageViewControllerV2"];
-    UINavigationController * nav = [[UINavigationController alloc]initWithRootViewController:ctl];
-    self.window.rootViewController = nav;
-     */
     [self customAppearance];
-    UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMRegisterViewController"];
-    UINavigationController * nav = [[UINavigationController alloc]initWithRootViewController:ctl];
-    self.window.rootViewController = nav;
-    
-    return YES;
+    [Configuration Instance].cookie = 0;
     
     [MobClick setLogEnabled:YES];
     UMConfigInstance.appKey = @"581aef3d6e27a42e19001a61";
@@ -59,22 +46,32 @@
     [[UMSocialManager defaultManager] setUmSocialAppkey:@"57b432afe0f55a9832001a0a"];
     [[UMSocialManager defaultManager] setPlaform:UMSocialPlatformType_QQ appKey:@"1105703581"  appSecret:@"KoQZJZK2RBCljHTC" redirectURL:@"http://mobile.umeng.com/social"];
      */
-    
+    //TO_UPDATE_PROFILE
+    [[[NSNotificationCenter defaultCenter] rac_addObserverForName:@"TO_UPDATE_PROFILE" object:nil] subscribeNext:^(id x) {
+        UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMRegisterViewController"];
+        UINavigationController * nav = [[UINavigationController alloc]initWithRootViewController:ctl];
+        self.window.rootViewController = nav;
+    }];
     
     [[[NSNotificationCenter defaultCenter] rac_addObserverForName:@"LOGIN_SUCCESS" object:nil] subscribeNext:^(id x) {
-        RootTabBarViewController *ctl = [[UIStoryboard storyboardWithName:@"firstpage" bundle:nil] instantiateViewControllerWithIdentifier:@"RootTabBarViewController"];
-        self.window.rootViewController = ctl;
-    }];
-    [[[NSNotificationCenter defaultCenter] rac_addObserverForName:@"LOGOUT_SUCCESS" object:nil] subscribeNext:^(id x) {
-        UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"V2LoginStoryboard" bundle:nil];
-        UINavigationController *nav = [mainStoryboard instantiateViewControllerWithIdentifier:@"LoginRootNavigation"];
+        UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMRelationViewController"];
+        UINavigationController * nav = [[UINavigationController alloc]initWithRootViewController:ctl];
         self.window.rootViewController = nav;
+    }];
+    
+    [[[NSNotificationCenter defaultCenter] rac_addObserverForName:@"LOGOUT_SUCCESS" object:nil] subscribeNext:^(id x) {
+
+        UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"WXLoginViewController"];
+        
+        self.window.rootViewController = ctl;
     }];
     
     //读取沙盒数据
     NSUserDefaults * settings1 = [NSUserDefaults standardUserDefaults];
     NSString *key1 = [NSString stringWithFormat:@"is_first"];
     NSString *value = [settings1 objectForKey:key1];
+    
+    value = @"SKIPP";
     if (!value)  //如果没有数据
     {
         self.window.rootViewController = [[NewFeatureViewController alloc] init];
@@ -91,54 +88,50 @@
         }
         else
         {
-            UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"V2LoginStoryboard" bundle:nil];
-            UINavigationController *nav = [mainStoryboard instantiateViewControllerWithIdentifier:@"LoginRootNavigation"];
-            self.window.rootViewController = nav;
+            UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"WXLoginViewController"];
+            self.window.rootViewController = ctl;
         }
 
     }
     
     [[[NSNotificationCenter defaultCenter] rac_addObserverForName:@"SwitchRootViewControllerNotification" object:nil] subscribeNext:^(id x) {
-        if(VERSION==1)
+        if ([[Configuration Instance] isCookie])
         {
-            ViewController * ctl = [[ViewController alloc]init];
-            UINavigationController * nav = [[UINavigationController alloc]initWithRootViewController:ctl];
-            self.window.rootViewController = nav;
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"LOGIN_SUCCESS" object:nil];
         }
         else
         {
-            if ([[Configuration Instance] isCookie])
-            {
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"LOGIN_SUCCESS" object:nil];
-            }
-            else
-            {
-                UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"V2LoginStoryboard" bundle:nil];
-                UINavigationController *nav = [mainStoryboard instantiateViewControllerWithIdentifier:@"LoginRootNavigation"];
-                self.window.rootViewController = nav;
-            }
-            
-            [[NSUserDefaults standardUserDefaults] setValue:@"done" forKey:@"is_first"];
+            UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"WXLoginViewController"];
+            self.window.rootViewController = ctl;
         }
+        [[NSUserDefaults standardUserDefaults] setValue:@"done" forKey:@"is_first"];
 
     }];
-    
-    
-
-    
-    [self customAppearance];
     
     if(![[NSUserDefaults standardUserDefaults] objectForKey:@"DeviceTokenStringKEY"])
         
     {
-        
         [[NSUserDefaults standardUserDefaults] setObject:[UIDevice currentDevice].identifierForVendor.UUIDString forKey:@"DeviceTokenStringKEY"];
         
     }
     
     [[BCWXSocialHandler sharedInstance] setWXAppId:@"wx961f9b27189265b8" appSecret:@"1ca695652c8fd494e7bf90c8bfd0140e"];
     
+    
+    //向微信注册
+    [WXApi registerApp:@"wx4868b35061f87885"]; // 注意这里不要写错！（写错后无法获取授权，停留在登录界面等待）
+    //    [WXApi isWXAppInstalled]; // 检查用户手机是否已安装微信客户端，对未安装的用户隐藏微信登录按钮，只提供其他登录方式（比如手机号注册登录、游客登录等）
     return YES;
+}
+
+// openURL
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
+    return [WXApi handleOpenURL:url delegate:self];
+}
+
+// handleURL
+- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
+    return [WXApi handleOpenURL:url delegate:self];
 }
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken

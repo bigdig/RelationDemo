@@ -13,58 +13,9 @@
 #import "Toast.h"
 #import "UITextField+PaddingText.h"
 #import "FRHyperLabel.h"
-
-
-@interface FMWtFaUserLoginModel : JSONModel
-/**
- {"code":1,"message":"success","info":{"user_id":88763,"user_name":"袁东华","mobile_phone":"18801123830","avatar":"/data/avatar/2015/09/02/14/88763/.png","recode":"4","redesc":"成功!"}
- */
-@property (nonatomic,strong) NSString<Optional> *user_id;
-@property (nonatomic,strong) NSString<Optional> *name;
-@property (nonatomic,strong) NSString<Optional> *mobile;
-@property (nonatomic,strong) NSString<Optional> *avatar;
-@property (nonatomic,strong) NSString<Optional> *pwd;
-@property (nonatomic,strong) NSString<Optional> *sex;
-@property (nonatomic,strong) NSString<Optional> *wxid;
-@property (nonatomic,strong) NSString<Optional> *wxnick;
-@property (nonatomic,strong) NSString<Optional> *wxpic;
-
-@property (nonatomic,assign) NSInteger code;
-@property (nonatomic,strong) NSString *message;
-
-- (BOOL)isSuccess;
-@end
-
-@implementation FMWtFaUserLoginModel
-
-/**
- 1：微信用户不存在，请绑定手机注册；
- 0：登录成功;
- */
-- (BOOL)isSuccess
-{
-    return self.code == 1;
-}
-
-+(JSONKeyMapper*)keyMapper
-{
-    return [[JSONKeyMapper alloc] initWithDictionary:@{
-                                                       @"code": @"code",
-                                                       @"message":@"message",
-                                                       @"info.faUser.id":@"user_id",
-                                                       @"info.faUser.name":@"name",
-                                                       @"info.faUser.mobile":@"mobile",
-                                                       @"info.faUser.pic":@"avatar",
-                                                       @"info.faUser.pwd":@"pwd",
-                                                       @"info.faUser.sex":@"sex",
-                                                       @"info.faUser.wxid":@"wxid",
-                                                       @"info.faUser.wxnick":@"wxnick",
-                                                       @"info.faUser.wxpic":@"wxpic",
-                                                       
-                                                       }];
-}
-
-@end
+#import "FMRelationListDataModels.h"
+#import "JSONHTTPClient.h"
+#import "FMWtFaUserLoginModel.h"
 
 
 @interface FMRegisterViewController ()
@@ -137,14 +88,30 @@
                     [[Configuration Instance].userName compare:@"家谱用户"] == NSOrderedSame
                     ) {
                     //complte profile
-                    UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMProfileTableViewController"];
-                    [self.navigationController pushViewController:ctl animated:YES];
+                    //if has relation, check it
+                    NSDictionary* para= @{@"user_id": [Configuration Instance].userID,
+                                          };
+                    
+                    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/faRelationListByUser.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
+                        //
+                        FMRelationListBaseClass *model = [FMRelationListBaseClass modelObjectWithDictionary:json];
+                        if ([model.info.relation count]) {
+                            UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMMatchViewController"];
+                            [self.navigationController pushViewController:ctl animated:YES];
+                        }
+                        else
+                        {
+                            UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMProfileTableViewController"];
+                            [self.navigationController pushViewController:ctl animated:YES];
+                        }
+                        
+                    }];
+
                 }
                 else
                 {
                     //show ralation
-                    UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMRelationViewController"];
-                    [self.navigationController pushViewController:ctl animated:YES];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"LOGIN_SUCCESS" object:nil];
                 }
             }
         }];
@@ -197,13 +164,18 @@
                     NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
                     
                     NSString *password = @"1234567";
-                    NSDictionary* para= @{@"device_code":devicetoken,
+                    NSDictionary* d= @{@"device_code":devicetoken,
                                           @"device_name":[[UIDevice currentDevice] model],
                                           @"mobile":self.phoneNumTextField.text,
                                           @"pwd": [password MD5Hash],
                                           @"appver": [NSString stringWithFormat:@"I_%@",version],
                                           @"channel":@"IOS"
                                           };
+                    NSMutableDictionary *para = [NSMutableDictionary dictionaryWithDictionary:d];
+                    
+                    if ([Configuration Instance].wxopenid) {
+                        [para setObject:[Configuration Instance].wxopenid forKey:@"wxid"];
+                    }
                     
                     [JSONHTTPClient postJSONFromURLWithString:[NSString stringWithFormat:@"%@/wtFaUserLogin.json",BASEURL]
                                                        params:para
@@ -226,8 +198,9 @@
                                                            [[Configuration Instance] setAvatar: [[NSString stringWithFormat:@"%@/%@",Prefix,model.avatar] URLEncodedStringFix]];
                                                            
                                                            [subscriber sendNext:RACTuplePack(@(YES),model.message)];
-                                                           
+                                                           /**
                                                            [[NSNotificationCenter defaultCenter] postNotificationName:@"LOGIN_SUCCESS" object:nil];
+                                                            */
                                                            
                                                        }
                                                        [subscriber sendCompleted];
@@ -238,5 +211,7 @@
     }];
 
 }
+
+
 
 @end

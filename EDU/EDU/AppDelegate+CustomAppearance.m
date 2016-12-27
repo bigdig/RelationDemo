@@ -23,7 +23,7 @@
     
     //set backgound
     //[[UINavigationBar appearance] setBackgroundImage:[UIImage imageNamed:@"nav_background_image"] forBarMetrics:(UIBarMetricsDefault)];
-    [[UINavigationBar appearance] setBackgroundImage:[UIColor imageWithColor:COLOR_LITLE_BLUE ] forBarMetrics:(UIBarMetricsDefault)];
+    [[UINavigationBar appearance] setBackgroundImage:[UIColor imageWithColor:COLOR_FAMILY_GREEN ] forBarMetrics:(UIBarMetricsDefault)];
     
     [[UINavigationBar appearance] setTranslucent:FALSE];
     
