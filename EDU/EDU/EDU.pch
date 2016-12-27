@@ -95,5 +95,6 @@
 
 #import "QQPlayViewController.h"
 
+#import <CCActivityHUD/CCActivityHUD.h>
 
 #endif /* EDU_pch */

@@ -17,6 +17,7 @@ target 'Family' do
     pod 'WEPopover'
     pod 'UMengUShare/Social/QQ'
     pod 'Weixin'
+    pod 'CCActivityHUD'
     use_frameworks!
 end
 

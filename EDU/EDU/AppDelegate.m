@@ -46,13 +46,7 @@
     [[UMSocialManager defaultManager] setUmSocialAppkey:@"57b432afe0f55a9832001a0a"];
     [[UMSocialManager defaultManager] setPlaform:UMSocialPlatformType_QQ appKey:@"1105703581"  appSecret:@"KoQZJZK2RBCljHTC" redirectURL:@"http://mobile.umeng.com/social"];
      */
-    //TO_UPDATE_PROFILE
-    [[[NSNotificationCenter defaultCenter] rac_addObserverForName:@"TO_UPDATE_PROFILE" object:nil] subscribeNext:^(id x) {
-        UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMRegisterViewController"];
-        UINavigationController * nav = [[UINavigationController alloc]initWithRootViewController:ctl];
-        self.window.rootViewController = nav;
-    }];
-    
+
     [[[NSNotificationCenter defaultCenter] rac_addObserverForName:@"LOGIN_SUCCESS" object:nil] subscribeNext:^(id x) {
         UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMRelationViewController"];
         UINavigationController * nav = [[UINavigationController alloc]initWithRootViewController:ctl];

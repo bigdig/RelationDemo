@@ -21,6 +21,7 @@
 @interface FMRegisterViewController ()
 
 @property (nonatomic,strong) RACCommand *registerCommand;
+@property (nonatomic,strong) CCActivityHUD *activityHUD;
 
 @end
 
@@ -31,6 +32,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    self.activityHUD = [CCActivityHUD new];
     
     [self.phoneNumTextField becomeFirstResponder];
     self.verifyCodeTextField.enabled = TRUE;
@@ -80,6 +82,10 @@
     }];
     
     self.nextButton.rac_command = [[RACCommand alloc] initWithEnabled:enableNext signalBlock:^RACSignal *(id input) {
+        
+        //HUD
+        //[self.activityHUD showWithType:CCActivityHUDIndicatorTypeDynamicArc];
+        
         [Configuration Instance].phoneNumber = self.phoneNumTextField.text;
         [Configuration Instance].verifyCode = self.verifyCodeTextField.text;
         [[_registerCommand execute:nil] subscribeNext:^(RACTuple *x) {
@@ -94,6 +100,7 @@
                     
                     [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/faRelationListByUser.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
                         //
+                        
                         FMRelationListBaseClass *model = [FMRelationListBaseClass modelObjectWithDictionary:json];
                         if ([model.info.relation count]) {
                             UIViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMMatchViewController"];
@@ -110,6 +117,9 @@
                 }
                 else
                 {
+                    
+                    [self.activityHUD dismiss];
+                    
                     //show ralation
                     [[NSNotificationCenter defaultCenter] postNotificationName:@"LOGIN_SUCCESS" object:nil];
                 }
