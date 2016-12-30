@@ -39,6 +39,12 @@
             [self presentViewController:nav animated:YES completion:^{
                 ;
             }];
+            //weixin://dl/scan
+            /**
+            NSString *weixinURL = @"weixin://scanqrcode";
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:weixinURL]];
+             */
+            
             return nil;
         }] deliverOnMainThread];
     }];

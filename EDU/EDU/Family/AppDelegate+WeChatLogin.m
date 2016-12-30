@@ -10,9 +10,13 @@
 #import "ReactiveCocoa.h"
 #import "FMWtFaUserLoginModel.h"
 #import "Toast.h"
+#import "FMLoginModel.h"
 
-#define APP_ID @"wx4868b35061f87885"
-#define APP_SECRET @"64020361b8ec4c99936c0e3999a9f249"
+//#define APP_ID @"wx4868b35061f87885"
+//#define APP_SECRET @"64020361b8ec4c99936c0e3999a9f249"
+
+#define APP_ID @"wxf58798795168b0cd"
+#define APP_SECRET @"50690ef174b74b40381e0cd34477733c"
 
 
 @implementation AppDelegate (WeChatLogin)
@@ -32,45 +36,8 @@
 - (void)onResp:(BaseResp *)resp {
     
     // 处理登录业务逻辑
-    RACCommand *loginCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
-        
-        return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber)
-                {
-                    NSDictionary* para= @{@"wxid": [Configuration Instance].wxopenid
-                                          };
-                    
-                    [JSONHTTPClient getJSONFromURLWithString:[NSString stringWithFormat:@"%@/wtFaUserLogin.json",BASEURL] params:para completion:^(id json, JSONModelError *err) {
-                        //
-                        //check err, process json ...
-                        FMWtFaUserLoginModel *model = [[FMWtFaUserLoginModel alloc] initWithDictionary:json error:nil];
-                        
-                        if (!model.isSuccess)
-                        {
-                            [subscriber sendNext:RACTuplePack(@(NO),model.message)];
-                        }
-                        else
-                        {
-                            [[NSUserDefaults standardUserDefaults]setValue:model.user_id forKey:@"user_id" ];
-                            [[NSUserDefaults standardUserDefaults]synchronize];
-                            
-                            [[Configuration Instance]saveUserID:model.user_id  andUserName:model.name andUserRank:Nil andRankName:Nil andRankImg:Nil andPhone:model.mobile];
-                            [[Configuration Instance] setPassword: [para valueForKey:@"password"]];
-                            [[Configuration Instance] setAvatar: [[NSString stringWithFormat:@"%@/%@",Prefix,model.avatar] URLEncodedStringFix]];
-                            
-                            [subscriber sendNext:RACTuplePack(@(YES),model.message)];
-                            /**
-                             [[NSNotificationCenter defaultCenter] postNotificationName:@"LOGIN_SUCCESS" object:nil];
-                             */
-                            
-                        }
-                        [subscriber sendCompleted];
-                        
-                    }];
-                    
-                    return nil;
-                }];
-    }];
-
+    FMUserLoginModel *m = [[FMUserLoginModel alloc] init];
+    RACCommand *loginCommand = m.command;
     [loginCommand.executionSignals.switchToLatest subscribeNext:^(id x) {
         //
         RACTupleUnpack(id success, NSString *info) = x;

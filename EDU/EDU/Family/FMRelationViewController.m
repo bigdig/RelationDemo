@@ -18,6 +18,8 @@
 
 #import "FMAutoConnectRelation.h"
 #import "FMMessageViewController.h"
+#import "NSString+AttributeString.h"
+#import <YYText/YYText.h>
 
 @interface FMRelationViewController ()<UITableViewDataSource,UITableViewDelegate>
 
@@ -79,15 +81,23 @@
     
     [[self rac_signalForSelector:@selector(tableView:didSelectRowAtIndexPath:)] subscribeNext:^(RACTuple *x) {
         NSIndexPath *indexPath = x.second;
-        FMRelationListRelation *item = [self.model.info.relation objectAtIndex:indexPath.row];
-        if (item.faUser == nil|| item.faUser.faUserIdentifier<0.01) {
-            
-            FMMessageViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMMessageViewController"];
-            ctl.phone = item.mobile;
-            ctl.callName = item.relationWithMe;
-            ctl.name = item.name;
-            [self.navigationController pushViewController:ctl animated:YES];
+        if (indexPath.row==0) {
+            [self performSegueWithIdentifier:@"FMEditProfile" sender:nil];
         }
+        else
+        {
+            FMRelationListRelation *item = [self.model.info.relation objectAtIndex:indexPath.row - 1];
+            //if (item.faUser == nil|| item.faUser.faUserIdentifier<0.01)
+            {
+                
+                FMMessageViewController * ctl = [[UIStoryboard storyboardWithName:@"Family" bundle:nil] instantiateViewControllerWithIdentifier:@"FMMessageViewController"];
+                ctl.phone = item.mobile;
+                ctl.callName = item.relationWithMe;
+                ctl.name = item.name;
+                [self.navigationController pushViewController:ctl animated:YES];
+            }
+        }
+
         
     }];
     
@@ -106,7 +116,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [self.model.info.relation count];
+    return [self.model.info.relation count] + 1;
 }
 
 
@@ -126,33 +136,60 @@
     //        bg.layer.masksToBounds = YES;
     //        cell.backgroundView = bg;
     //    }
-    
-    FMRelationListRelation *item = [self.model.info.relation objectAtIndex:indexPath.row];
-    {
-        UIImageView *image = [cell viewWithTag:100];
-        [image setCropImageForNormalState:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.pic] URLEncodedStringFix]]];
-    }
-    {
-        UILabel *text = [cell viewWithTag:110];
-        text.text = [NSString stringWithFormat:@"%@ (%@)", item.relationWithMe, item.name];
-    }
-    {
-        UILabel *text = [cell viewWithTag:120];
-        text.text = item.birthdayShow;
-    }
-    {
-        UILabel *text = [cell viewWithTag:130];
-        text.text = item.mobile;
-    }
-    {
-        UILabel *text = [cell viewWithTag:140];
-        if (item.faUser == nil || item.faUser.faUserIdentifier<0.01) {
-            text.text = @"邀请补充";
-        }
-        else
+    if (indexPath.row==0) {
         {
-            text.text = @"";
+            UIImageView *image = [cell viewWithTag:100];
+            [image setCropImageForNormalState:[NSURL URLWithString:[Configuration Instance].avatar]];
         }
+        {
+            YYLabel *text = [cell viewWithTag:110];
+            text.attributedText = [NSString getNameSex:[Configuration Instance].userName sex:[[Configuration Instance].sex integerValue] ];
+        }
+        {
+            UILabel *text = [cell viewWithTag:120];
+            text.text = [Configuration Instance].birthday;
+        }
+        {
+            UILabel *text = [cell viewWithTag:130];
+            text.text = [Configuration Instance].phoneNumber;
+        }
+        {
+            UILabel *text = [cell viewWithTag:140];
+            text.text = @"编辑";
+        }
+    }
+    else
+    {
+        
+        FMRelationListRelation *item = [self.model.info.relation objectAtIndex:indexPath.row-1];
+        {
+            UIImageView *image = [cell viewWithTag:100];
+            [image setCropImageForNormalState:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, item.pic] URLEncodedStringFix]]];
+        }
+        {
+            UILabel *text = [cell viewWithTag:110];
+            NSString *info = [NSString stringWithFormat:@"%@ (%@)", item.relationWithMe, item.name];
+            text.attributedText = [NSString getNameSex:info sex:item.sex ];
+        }
+        {
+            UILabel *text = [cell viewWithTag:120];
+            text.text = item.birthdayShow;
+        }
+        {
+            UILabel *text = [cell viewWithTag:130];
+            text.text = item.mobile;
+        }
+        {
+            UILabel *text = [cell viewWithTag:140];
+            if (item.faUser == nil || item.faUser.faUserIdentifier<0.01) {
+                text.text = @"邀请补充";
+            }
+            else
+            {
+                text.text = @"邀请补充";
+            }
+        }
+
     }
     
     return cell;

@@ -37,7 +37,7 @@
 			<string>WX</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>wx4868b35061f87885</string>
+				<string>wxf58798795168b0cd</string>
 			</array>
 		</dict>
 	</array>
@@ -75,13 +75,14 @@
 		<string>mqzoneopensdk</string>
 		<string>alipay</string>
 		<string>alipayshare</string>
+		<string>weixin</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
-		<true/>
+		<false/>
 	</dict>
 	<key>NSContactsUsageDescription</key>
 	<string>若不允许，将无法发送短信</string>

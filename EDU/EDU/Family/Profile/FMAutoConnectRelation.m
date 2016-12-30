@@ -99,7 +99,7 @@
                         }];
                         
                         
-                        NSMutableArray *relationArray = [NSMutableArray arrayWithCapacity:100];
+                        NSMutableSet *relationSet = [NSMutableSet setWithCapacity:100];
                         
                         [model.info.relation enumerateObjectsUsingBlock:^(FMRelationListRelation*  _Nonnull objA, NSUInteger idx, BOOL * _Nonnull stop) {
                             
@@ -115,7 +115,7 @@
                                     NSLog(@"%@",r);
                                     if([r length])
                                     {
-                                        [relationArray addObject:[NSString stringWithFormat:@"%@@%@@%@",idcode,r,r]];
+                                        [relationSet addObject:[NSString stringWithFormat:@"%@@%@@%@",idcode,r,r]];
                                     }
 
                                 }
@@ -124,8 +124,8 @@
                             }];
                         }];
                         
-                        if ([relationArray count]) {
-                            NSDictionary* para= @{@"user_id":[Configuration Instance].userID,                                                  @"params": [relationArray componentsJoinedByString:@","]
+                        if ([relationSet count]) {
+                            NSDictionary* para= @{@"user_id":[Configuration Instance].userID,                                                  @"params": [[relationSet allObjects] componentsJoinedByString:@","]
                                                   };
                             
                             [JSONHTTPClient postJSONFromURLWithString:[NSString stringWithFormat:@"%@/wtFaRelationAddMore.json",BASEURL]
@@ -141,7 +141,7 @@
                                                                }
                                                                else
                                                                {
-                                                                   NSString *info = [NSString stringWithFormat:@"又找到了 %n 亲戚！",[relationArray count]];
+                                                                   NSString *info = [NSString stringWithFormat:@"又找到了 %n 亲戚！",[relationSet count]];
                                                                    [subscriber sendNext:RACTuplePack(@(YES),info)];
                                                                }
                                                                [subscriber sendCompleted];

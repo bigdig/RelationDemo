@@ -49,7 +49,7 @@
     JSValue *function = [JSCaller ShareInstance].getFilterRelativeFunction;
 
     self.tagDictionary = @{
-                           @"常用":@[@"父亲",@"母亲",@"哥哥",@"弟弟",@"姐姐",@"妹妹",@"女儿",@"儿子"],
+                           @"常用":@[@"爷爷",@"奶奶",@"父亲",@"母亲",@"丈夫",@"妻子",@"哥哥",@"弟弟",@"姐姐",@"妹妹",@"女儿",@"儿子"],
                            @"本家":[[function callWithArguments:@[@"f"]] toArray],
                            @"外家":[[function callWithArguments:@[@"m"]] toArray],
                            @"婆家":[[function callWithArguments:@[@"h"]] toArray],

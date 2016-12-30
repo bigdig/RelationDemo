@@ -76,6 +76,9 @@
         RACTupleUnpack(id success, NSString *info) = x;
         
         if ([success boolValue]) {
+            //处理一下缓存
+            [[SDWebImageManager sharedManager] saveImageToCache:self.faceImageView.image forURL: [NSURL URLWithString:[Configuration Instance].avatar]];
+            
             [[NSNotificationCenter defaultCenter] postNotificationName:@"LOGIN_SUCCESS" object:nil];
         }
         else

@@ -11,6 +11,7 @@
 #import "JSONHTTPClient.h"
 #import "BloomFilter.h"
 #import "JSCaller.h"
+#import "NSObject+PostImageHttps.h"
 
 @interface WtFaRelationAddModel : JSONModel
 
@@ -174,44 +175,5 @@
 }
 
 
-- (void)requestPostUrlWithImage: (NSString *)serviceName parameters:(NSDictionary *)dictParams image:(UIImage *)image success:(void (^)(NSDictionary *responce))success failure:(void (^)(NSError *error))failure {
-    
-    NSString *strService = [NSString stringWithFormat:@"%@%@",BASEURL,serviceName];
-    
-    NSData *fileData = image?UIImageJPEGRepresentation(image, 0.5):nil;
-    
-    NSError *error;
-    NSMutableURLRequest *request = [[AFHTTPRequestSerializer serializer] multipartFormRequestWithMethod:@"POST" URLString:strService parameters:dictParams constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
-        
-        if(fileData){
-            [formData appendPartWithFileData:fileData
-                                        name:@"uploadFile"
-                                    fileName:@"face.jpg"
-                                    mimeType:@"image/jpeg"];
-        }
-    } error:&error];
-    
-    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
-    
-    NSURLSessionUploadTask *uploadTask;
-    uploadTask = [manager uploadTaskWithStreamedRequest:request progress:^(NSProgress * _Nonnull uploadProgress) {
-        
-        NSLog(@"Wrote %f", uploadProgress.fractionCompleted);
-    }
-                                      completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
-                                          if (error)
-                                          {
-                                              failure(error);
-                                          }
-                                          else
-                                          {
-                                              NSLog(@"POST Response  : %@",responseObject);
-                                              success(responseObject);
-                                          }
-                                      }];
-    
-    [uploadTask resume];
-    
-}
 
 @end

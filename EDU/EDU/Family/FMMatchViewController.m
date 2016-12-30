@@ -142,7 +142,7 @@
         cell = [tableView dequeueReusableCellWithIdentifier:@"me"];
         {
             UIImageView *image = [cell viewWithTag:100];
-            [image setCropImageForNormalState:[NSURL URLWithString:[[NSString stringWithFormat:@"%@%@",Prefix, [Configuration Instance].avatar] URLEncodedStringFix]]];
+            [image setCropImageForNormalState:[NSURL URLWithString:[Configuration Instance].avatar]];
         }
         {
             YYLabel *text = [cell viewWithTag:110];

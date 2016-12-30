@@ -12,6 +12,7 @@
 #import "JSONHTTPClient.h"
 #import "Toast.h"
 #import "YYText/YYText.h"
+#import "JSCaller.h"
 
 @interface FMMessageViewController ()<MFMessageComposeViewControllerDelegate>
 
@@ -47,8 +48,16 @@
         self.headLabel.attributedText = text;
     }
     
-    self.messageTextField.text = [NSString stringWithFormat:@"你的%@ %@正在使用<<家谱>>APP制作家谱，邀请您一起完成。请到应用市场搜索\"家谱\"下载安装",
-                                  self.callName,self.name
+    JSValue *result = [[JSCaller ShareInstance].relationFunction callWithArguments:@[@{@"text":self.callName,
+                                                                                       @"sex":[NSNumber numberWithInt:[[Configuration Instance].sex integerValue]],
+                                                                                       @"reverse":[NSNumber numberWithBool:true]
+                                                                                       
+                                                                                       }]];
+    NSString *r = [result toString];
+    NSLog(@"%@",r);
+    
+    self.messageTextField.text = [NSString stringWithFormat:@"你的%@ %@正在使用<<即刻家谱家谱>>APP制作家谱，邀请您一起完成。请到应用市场搜索\"即刻家谱家谱\"下载安装",
+                                  r,self.name
                                   ];
     
     self.sendButton.rac_command = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {

@@ -25,9 +25,9 @@
 
 #define SHARE_URL @"http://xingguangedu.com/share/download.html?from=singlemessage"
 */
-#define Prefix               @"http://st.dressbook.cn"             //图片的前缀
-#define DOMAIN_NAME_JAVA          @"http://ifc.dressbook.cn/"
-#define BASEURL @"http://ifc.dressbook.cn/"
+#define Prefix               @"https://st.dressbook.cn"             //图片的前缀
+#define DOMAIN_NAME_JAVA          @"https://ifc.dressbook.cn/"
+#define BASEURL @"https://ifc.dressbook.cn/"
 
 #define SHARE_URL @"http://xingguangedu.com/share/download.html?from=singlemessage"
 

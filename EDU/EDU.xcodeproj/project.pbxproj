@@ -243,6 +243,9 @@
 		63A061B11DD3278E000E390F /* EDUBaiduSchoolResults.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A061AE1DD3278E000E390F /* EDUBaiduSchoolResults.m */; };
 		63A061B41DD32926000E390F /* SchoolSelectViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A061B31DD32926000E390F /* SchoolSelectViewController.m */; };
 		63A061B71DD59F6D000E390F /* PureSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A061B61DD59F6D000E390F /* PureSearchViewController.m */; };
+		63B179BF1E135EF0008BD2BD /* FMLoginModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 63B179BE1E135EF0008BD2BD /* FMLoginModel.m */; };
+		63B179C51E163F46008BD2BD /* server.cer in Resources */ = {isa = PBXBuildFile; fileRef = 63B179C41E163F46008BD2BD /* server.cer */; };
+		63B179CB1E1648A0008BD2BD /* NSObject+PostImageHttps.m in Sources */ = {isa = PBXBuildFile; fileRef = 63B179CA1E1648A0008BD2BD /* NSObject+PostImageHttps.m */; };
 		63CCBD4D1D9A671800E86D03 /* .gitkeep in Resources */ = {isa = PBXBuildFile; fileRef = 63CCBD3A1D9A671800E86D03 /* .gitkeep */; };
 		63CCBD4E1D9A671800E86D03 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63CCBD3B1D9A671800E86D03 /* Assets.xcassets */; };
 		63CCBD501D9A671800E86D03 /* BCWXBaseActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CCBD3F1D9A671800E86D03 /* BCWXBaseActivity.m */; };
@@ -780,6 +783,11 @@
 		63A061B31DD32926000E390F /* SchoolSelectViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SchoolSelectViewController.m; sourceTree = "<group>"; };
 		63A061B51DD59F6D000E390F /* PureSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PureSearchViewController.h; sourceTree = "<group>"; };
 		63A061B61DD59F6D000E390F /* PureSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PureSearchViewController.m; sourceTree = "<group>"; };
+		63B179BD1E135EF0008BD2BD /* FMLoginModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FMLoginModel.h; sourceTree = "<group>"; };
+		63B179BE1E135EF0008BD2BD /* FMLoginModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FMLoginModel.m; sourceTree = "<group>"; };
+		63B179C41E163F46008BD2BD /* server.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = server.cer; sourceTree = "<group>"; };
+		63B179C91E1648A0008BD2BD /* NSObject+PostImageHttps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+PostImageHttps.h"; sourceTree = "<group>"; };
+		63B179CA1E1648A0008BD2BD /* NSObject+PostImageHttps.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+PostImageHttps.m"; sourceTree = "<group>"; };
 		63CCBD3A1D9A671800E86D03 /* .gitkeep */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		63CCBD3B1D9A671800E86D03 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		63CCBD3E1D9A671800E86D03 /* BCWXBaseActivity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BCWXBaseActivity.h; sourceTree = "<group>"; };
@@ -1248,6 +1256,7 @@
 		635065FD1D742E6B00B841C6 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				63B179C41E163F46008BD2BD /* server.cer */,
 				635065FE1D742E6B00B841C6 /* main.m */,
 				6350661A1D76CA2A00B841C6 /* EDU.pch */,
 			);
@@ -1740,6 +1749,10 @@
 				636154E91E0B6E67003DA0D9 /* FMFamilyProfileViewModel.m */,
 				636155051E0BC6BB003DA0D9 /* FMAutoConnectRelation.m */,
 				636155061E0BC6BB003DA0D9 /* FMAutoConnectRelation.h */,
+				63B179BD1E135EF0008BD2BD /* FMLoginModel.h */,
+				63B179BE1E135EF0008BD2BD /* FMLoginModel.m */,
+				63B179C91E1648A0008BD2BD /* NSObject+PostImageHttps.h */,
+				63B179CA1E1648A0008BD2BD /* NSObject+PostImageHttps.m */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -2317,7 +2330,7 @@
 				TargetAttributes = {
 					635065F91D742E6B00B841C6 = {
 						CreatedOnToolsVersion = 7.3;
-						DevelopmentTeam = FDA47LM3X2;
+						DevelopmentTeam = 5UV7D6PT3J;
 						LastSwiftMigration = 0800;
 						SystemCapabilities = {
 							com.apple.Push = {
@@ -2399,6 +2412,7 @@
 				63D00F2C1DB4C60800F7AACA /* 10804.jpg in Resources */,
 				63D00ECA1DAF88FD00F7AACA /* HZYResource.bundle in Resources */,
 				634AFA761DED1D5B00576075 /* CustomPopover.xcassets in Resources */,
+				63B179C51E163F46008BD2BD /* server.cer in Resources */,
 				6356976D1DF5663B00B9725F /* PFNavigationDropdownMenu.bundle in Resources */,
 				634AFA871DED1D5B00576075 /* popoverBg-white@2x.png in Resources */,
 				634AFA861DED1D5B00576075 /* popoverArrowUpSimple.png in Resources */,
@@ -2509,6 +2523,7 @@
 				6327E28B1DBA05230085D881 /* UIImage+Mask.m in Sources */,
 				63FF07821DAE114D001993F1 /* EDUArticlesInfo.m in Sources */,
 				633409011DCB2C7F00CFA7CD /* ZYShareSheetView.m in Sources */,
+				63B179BF1E135EF0008BD2BD /* FMLoginModel.m in Sources */,
 				6350662A1D76D4B800B841C6 /* UINavigationBar+Background.m in Sources */,
 				63FF078D1DAE206C001993F1 /* EDUWorksListInfo.m in Sources */,
 				63D00F1C1DB4A46200F7AACA /* RegisterViewController2.m in Sources */,
@@ -2557,6 +2572,7 @@
 				63A061B01DD3278E000E390F /* EDUBaiduSchoolLocation.m in Sources */,
 				63FF078C1DAE206C001993F1 /* EDUWorksListBaseClass.m in Sources */,
 				63FF077A1DAE0DA2001993F1 /* WonderfulArticlesViewController.m in Sources */,
+				63B179CB1E1648A0008BD2BD /* NSObject+PostImageHttps.m in Sources */,
 				6356977F1DF56FB700B9725F /* EDUTagListInfo.m in Sources */,
 				63FF076F1DADDFF1001993F1 /* EDUAdBaseClass.m in Sources */,
 				6361550F1E10C589003DA0D9 /* FMMatchViewController.m in Sources */,
@@ -2835,6 +2851,7 @@
 				CODE_SIGN_ENTITLEMENTS = EDU/EDU.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = 5UV7D6PT3J;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/EDU/Third",
@@ -2850,7 +2867,7 @@
 				INFOPLIST_FILE = EDU/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.startpark.arteducation;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.dressbook.family;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "EDU/Utility/DropMenu/EDU-Bridging-Header.h";
@@ -2873,6 +2890,7 @@
 				CODE_SIGN_ENTITLEMENTS = EDU/EDU.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = 5UV7D6PT3J;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/EDU/Third",
@@ -2888,7 +2906,7 @@
 				INFOPLIST_FILE = EDU/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.startpark.arteducation;
+				PRODUCT_BUNDLE_IDENTIFIER = cn.dressbook.family;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "EDU/Utility/DropMenu/EDU-Bridging-Header.h";

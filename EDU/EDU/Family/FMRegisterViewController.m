@@ -15,12 +15,11 @@
 #import "FRHyperLabel.h"
 #import "FMRelationListDataModels.h"
 #import "JSONHTTPClient.h"
-#import "FMWtFaUserLoginModel.h"
+#import "FMLoginModel.h"
 
 
 @interface FMRegisterViewController ()
 
-@property (nonatomic,strong) RACCommand *registerCommand;
 @property (nonatomic,strong) CCActivityHUD *activityHUD;
 
 @end
@@ -83,12 +82,15 @@
     
     self.nextButton.rac_command = [[RACCommand alloc] initWithEnabled:enableNext signalBlock:^RACSignal *(id input) {
         
+        [self.view endEditing:YES];
         //HUD
         //[self.activityHUD showWithType:CCActivityHUDIndicatorTypeDynamicArc];
         
         [Configuration Instance].phoneNumber = self.phoneNumTextField.text;
         [Configuration Instance].verifyCode = self.verifyCodeTextField.text;
-        [[_registerCommand execute:nil] subscribeNext:^(RACTuple *x) {
+        
+        FMUserLoginModel *regModel = [[FMUserLoginModel alloc] init];
+        [[regModel.command execute:nil] subscribeNext:^(RACTuple *x) {
             if ([x.first boolValue]) {
                 if ([[Configuration Instance].userName length] == 0 ||
                     [[Configuration Instance].userName compare:@"家谱用户"] == NSOrderedSame
@@ -117,9 +119,6 @@
                 }
                 else
                 {
-                    
-                    [self.activityHUD dismiss];
-                    
                     //show ralation
                     [[NSNotificationCenter defaultCenter] postNotificationName:@"LOGIN_SUCCESS" object:nil];
                 }
@@ -161,64 +160,7 @@
         }];
     }
      */
-    
-    // 处理登录业务逻辑
-    _registerCommand = [[RACCommand alloc] initWithSignalBlock:^RACSignal *(id input) {
-        
-        return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber)
-                {
 
-                    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-                    NSString *devicetoken = [userDefaults objectForKey:@"DeviceTokenStringKEY"];
-                    
-                    NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-                    
-                    NSString *password = @"1234567";
-                    NSDictionary* d= @{@"device_code":devicetoken,
-                                          @"device_name":[[UIDevice currentDevice] model],
-                                          @"mobile":self.phoneNumTextField.text,
-                                          @"pwd": [password MD5Hash],
-                                          @"appver": [NSString stringWithFormat:@"I_%@",version],
-                                          @"channel":@"IOS"
-                                          };
-                    NSMutableDictionary *para = [NSMutableDictionary dictionaryWithDictionary:d];
-                    
-                    if ([Configuration Instance].wxopenid) {
-                        [para setObject:[Configuration Instance].wxopenid forKey:@"wxid"];
-                    }
-                    
-                    [JSONHTTPClient postJSONFromURLWithString:[NSString stringWithFormat:@"%@/wtFaUserLogin.json",BASEURL]
-                                                       params:para
-                                                   completion:^(id json, JSONModelError *err) {
-                                                       
-                                                       //check err, process json ...
-                                                       FMWtFaUserLoginModel *model = [[FMWtFaUserLoginModel alloc] initWithDictionary:json error:nil];
-                                                       
-                                                       if (!model.isSuccess)
-                                                       {
-                                                           [subscriber sendNext:RACTuplePack(@(NO),model.message)];
-                                                       }
-                                                       else
-                                                       {
-                                                           [[NSUserDefaults standardUserDefaults]setValue:model.user_id forKey:@"user_id" ];
-                                                           [[NSUserDefaults standardUserDefaults]synchronize];
-                                                           
-                                                           [[Configuration Instance]saveUserID:model.user_id  andUserName:model.name andUserRank:Nil andRankName:Nil andRankImg:Nil andPhone:model.mobile];
-                                                           [[Configuration Instance] setPassword: [para valueForKey:@"password"]];
-                                                           [[Configuration Instance] setAvatar: [[NSString stringWithFormat:@"%@/%@",Prefix,model.avatar] URLEncodedStringFix]];
-                                                           
-                                                           [subscriber sendNext:RACTuplePack(@(YES),model.message)];
-                                                           /**
-                                                           [[NSNotificationCenter defaultCenter] postNotificationName:@"LOGIN_SUCCESS" object:nil];
-                                                            */
-                                                           
-                                                       }
-                                                       [subscriber sendCompleted];
-                                                   }];
-                    
-                    return nil;
-                }];
-    }];
 
 }
 

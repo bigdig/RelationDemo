@@ -95,7 +95,7 @@
                               @"code":verifyCode
                               };
         
-        [JSONHTTPClient postJSONFromURLWithString:[NSString stringWithFormat:@"%@/secCodeSend.json",BASEURL]
+        [JSONHTTPClient postJSONFromURLWithString:[NSString stringWithFormat:@"%@/secCodeSendFamily.json",BASEURL]
                                            params:para
                                        completion:^(id json, JSONModelError *err) {
                                        }];
